@@ -4,263 +4,344 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2026 最强 AI 大模型横评：DeepSeek V4 vs Claude 4 vs 豆包，开发者到底该选谁？ — AI 开发者笔记</title>
-<meta name="description" content="AI 变现实战 · Agent 开发 · 大模型测评">
+<meta name="description" content="">
 <meta property="og:title" content="2026 最强 AI 大模型横评：DeepSeek V4 vs Claude 4 vs 豆包，开发者到底该选谁？">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://messiahyl.github.io">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=LXGW+WenKai:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* === Design Tokens === */
 :root {
-  --primary: #00F0FF;
-  --primary-dim: #006870;
-  --accent: #FFB800;
-  --bg: #0A0E17;
-  --bg-card: #111827;
-  --text: #E8EDF5;
-  --muted: #5A6980;
-  --border: #1E2A3A;
-  --font-display: 'Space Grotesk', 'Noto Sans SC', sans-serif;
-  --font-body: 'Noto Sans SC', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --ink: #1C1917;
+  --paper: #FAF9F6;
+  --paper-warm: #F5F0E8;
+  --stone: #78716C;
+  --stone-light: #A8A29E;
+  --accent: #B45309;
+  --accent-light: #D97706;
+  --accent-bg: rgba(180,83,9,0.06);
+  --line: #E7E5E4;
+  --line-dark: #D6D3D1;
+  --serif: 'Noto Serif SC', 'Georgia', 'Times New Roman', serif;
+  --body: 'LXGW WenKai', 'Noto Serif SC', Georgia, serif;
+  --mono: 'JetBrains Mono', 'Menlo', monospace;
 }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
-  font-family: var(--font-body);
-  background: var(--bg);
-  color: var(--text);
+  font-family: var(--body);
+  background: var(--paper);
+  color: var(--ink);
   line-height: 1.8;
   min-height: 100vh;
 }
-a { color: var(--primary); text-decoration: none; }
-a:hover { opacity: 0.85; }
 
-body::before {
+body::after {
   content: '';
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-image:
-    linear-gradient(rgba(0,240,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,240,255,0.02) 1px, transparent 1px);
-  background-size: 60px 60px;
+  inset: 0;
+  background-image: radial-gradient(circle, #d6d3d1 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+  opacity: 0.25;
   pointer-events: none;
   z-index: 0;
 }
 
-.glow-orb {
-  position: fixed;
-  width: 500px; height: 500px;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.05;
-  pointer-events: none;
-  z-index: 0;
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
-.glow-orb.cyan { background: var(--primary); top: -150px; right: -100px; }
+a:hover { color: var(--accent-light); }
 
+/* === Layout === */
 .container {
-  max-width: 760px;
+  max-width: 700px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 28px;
   position: relative;
   z-index: 1;
 }
 
-/* Back link */
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 48px;
-  font-size: 14px;
-  color: var(--muted);
-  font-family: var(--font-mono);
+/* === Masthead === */
+.masthead {
+  padding: 48px 0 16px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
 }
-.back-link:hover { color: var(--primary); }
+.masthead-title {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.masthead-title a { color: var(--ink); }
+.masthead-title a:hover { color: var(--accent); }
+.masthead-nav {
+  display: flex;
+  gap: 20px;
+  font-size: 13px;
+}
+.masthead-nav a {
+  color: var(--stone);
+}
+.masthead-nav a:hover { color: var(--ink); }
 
-/* Article header */
+.rule { border: none; border-top: 1px solid var(--line); margin: 0; }
+
+/* === Article Header === */
 .article-header {
-  padding: 40px 0 32px;
-  border-bottom: 1px solid var(--border);
+  padding: 40px 0 28px;
 }
 .article-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 16px;
   font-size: 13px;
+  color: var(--stone-light);
 }
 .article-meta .date {
-  font-family: var(--font-mono);
-  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.article-separator {
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: var(--line-dark);
 }
 .article-tags { display: flex; gap: 6px; }
 .tag {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(0,240,255,0.08);
-  color: var(--primary);
-  border: 1px solid rgba(0,240,255,0.15);
+  font-size: 12px;
+  color: var(--stone);
+  background: var(--paper-warm);
+  padding: 1px 8px;
+  border-radius: 3px;
 }
 .article-header h1 {
-  font-family: var(--font-display);
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--text);
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1.35;
+  color: var(--ink);
   letter-spacing: -0.5px;
 }
 
-/* Article body */
+/* === Article Body === */
 .article-body {
-  padding: 36px 0 48px;
-  font-size: 16px;
+  padding: 8px 0 56px;
+  font-size: 16.5px;
 }
 .article-body h2 {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 600;
-  color: var(--text);
-  margin: 48px 0 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 52px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  letter-spacing: -0.3px;
 }
 .article-body h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text);
-  margin: 32px 0 12px;
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 36px 0 12px;
 }
 .article-body p {
-  margin-bottom: 16px;
-  color: #C8D0DE;
+  margin-bottom: 18px;
+  color: #44403C;
+  line-height: 1.85;
 }
 .article-body blockquote {
-  border-left: 3px solid var(--primary);
-  padding: 12px 20px;
-  margin: 20px 0;
-  background: rgba(0,240,255,0.04);
-  border-radius: 0 8px 8px 0;
-  color: #A0B0C8;
+  border-left: 3px solid var(--accent);
+  padding: 14px 20px;
+  margin: 24px 0;
+  background: var(--accent-bg);
+  border-radius: 0 6px 6px 0;
+  color: var(--stone);
   font-style: italic;
 }
-.article-body ul {
+.article-body ul, .article-body ol {
   margin: 16px 0;
   padding-left: 24px;
 }
 .article-body li {
   margin-bottom: 8px;
-  color: #C8D0DE;
+  color: #44403C;
+  line-height: 1.75;
 }
 .article-body strong {
-  color: var(--text);
-  font-weight: 600;
+  color: var(--ink);
+  font-weight: 700;
 }
 .article-body em {
-  color: var(--primary);
+  color: var(--accent);
   font-style: normal;
 }
 .article-body code {
-  font-family: var(--font-mono);
+  font-family: var(--mono);
   font-size: 14px;
-  background: rgba(0,240,255,0.08);
-  color: var(--primary);
+  background: var(--paper-warm);
+  color: var(--accent);
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
 }
 .article-body pre {
-  background: #0D1117;
-  border: 1px solid var(--border);
+  background: #1C1917;
+  border: 1px solid #292524;
   border-radius: 8px;
-  padding: 20px;
+  padding: 22px;
   overflow-x: auto;
-  margin: 20px 0;
+  margin: 24px 0;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 .article-body pre code {
   background: none;
-  color: #C9D1D9;
+  color: #D6D3D1;
   padding: 0;
+  border: none;
 }
 .article-body hr {
   border: none;
-  border-top: 1px solid var(--border);
-  margin: 36px 0;
+  border-top: 1px solid var(--line);
+  margin: 40px 0;
 }
 .article-body table {
   width: 100%;
   border-collapse: collapse;
-  margin: 20px 0;
-  font-size: 14px;
+  margin: 24px 0;
+  font-size: 14.5px;
 }
 .article-body th {
   text-align: left;
   padding: 10px 14px;
-  border-bottom: 2px solid var(--primary-dim);
-  color: var(--primary);
-  font-family: var(--font-mono);
+  border-bottom: 2px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--serif);
   font-size: 13px;
+  font-weight: 700;
 }
 .article-body td {
   padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
-  color: #C8D0DE;
+  border-bottom: 1px solid var(--line);
+  color: #44403C;
 }
 .article-body img {
   max-width: 100%;
-  border-radius: 8px;
-  margin: 16px 0;
+  border-radius: 6px;
+  margin: 20px 0;
 }
 
-/* Navigation */
+/* === Article Nav === */
 .article-nav {
   display: flex;
   justify-content: space-between;
-  padding: 32px 0;
-  border-top: 1px solid var(--border);
+  padding: 28px 0;
+  border-top: 1px solid var(--line);
   font-size: 14px;
 }
 .article-nav a {
-  color: var(--muted);
+  color: var(--stone);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 45%;
 }
-.article-nav a:hover { color: var(--primary); }
+.article-nav a:hover { color: var(--accent); }
+.article-nav .nav-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--stone-light);
+  letter-spacing: 1px;
+}
+.article-nav .nav-title {
+  font-family: var(--serif);
+  font-weight: 600;
+}
 
-/* Footer */
+/* === Footer === */
 footer {
-  padding: 40px 0;
-  border-top: 1px solid var(--border);
+  padding: 32px 0 48px;
   text-align: center;
   font-size: 13px;
-  color: var(--muted);
+  color: var(--stone-light);
+}
+footer a { color: var(--stone); }
+footer a:hover { color: var(--accent); }
+
+/* === Reading progress bar === */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  z-index: 100;
+  transition: width 0.1s linear;
+  opacity: 0.7;
 }
 
+/* === Animations === */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.article-header, .article-body { animation: fadeIn 0.5s ease both; }
-.article-body { animation-delay: 0.1s; }
+.article-header { animation: fadeIn 0.4s ease both; }
+.article-body { animation: fadeIn 0.4s ease 0.08s both; }
 
 @media (max-width: 640px) {
-  .article-header h1 { font-size: 24px; }
+  .article-header h1 { font-size: 26px; }
   .article-body { font-size: 15px; }
+  .container { padding: 0 20px; }
+  .masthead { padding: 32px 0 12px; }
 }
 </style>
 </head>
 <body>
 
-<div class="glow-orb cyan"></div>
+<div class="progress-bar" id="progressBar"></div>
+<script>
+// Reading progress indicator
+window.addEventListener('scroll', function() {
+  var el = document.documentElement;
+  var scrollTop = el.scrollTop || document.body.scrollTop;
+  var scrollHeight = el.scrollHeight - el.clientHeight;
+  var progress = (scrollTop / scrollHeight) * 100;
+  document.getElementById('progressBar').style.width = progress + '%';
+});
+</script>
 
 <div class="container">
-  <a href="/" class="back-link">← 返回首页</a>
+  <!-- Masthead -->
+  <div class="masthead">
+    <div class="masthead-title"><a href="/">AI 开发者笔记</a></div>
+    <nav class="masthead-nav">
+      <a href="/">文章</a>
+      <a href="https://github.com/messiahyl" target="_blank">GitHub</a>
+    </nav>
+  </div>
 
+  <hr class="rule">
+
+  <!-- Article -->
   <header class="article-header">
     <div class="article-meta">
       <span class="date">2026-05-24</span>
+      <span class="article-separator"></span>
       <div class="article-tags"><span class="tag">["AI</span><span class="tag">Agent</span><span class="tag">DeepSeek</span><span class="tag">Claude</span><span class="tag">大模型"]</span></div>
     </div>
     <h1>2026 最强 AI 大模型横评：DeepSeek V4 vs Claude 4 vs 豆包，开发者到底该选谁？</h1>
@@ -347,13 +428,15 @@ footer {
 <p><em>本文首发于微信公众号，转载请注明出处。</em></p>
   </article>
 
+  <!-- Prev / Next -->
   <div class="article-nav">
     <div></div>
-    <div><a href="/article/02_ai_agent元年_manus_mcp_智能体.html" class="nav-next">2026 AI Agent 元年：从 Manus 到 MCP 协议，智能体如何彻底重塑你的工作方式？ →</a></div>
+    <div style="text-align:right"><a href="/article/02_ai_agent元年_manus_mcp_智能体.html"><span class="nav-label">下一篇 →</span><span class="nav-title">2026 AI Agent 元年：从 Manus 到 MCP 协议，智能体如何彻底重塑你的工作方式？</span></a></div>
   </div>
 
   <footer>
-    <p>© 2026 月流烟渚 · Powered by Neon Substrate</p>
+    <p>© 2026 月流烟渚</p>
+    <p style="margin-top:4px;"><a href="/">返回首页</a></p>
   </footer>
 </div>
 
