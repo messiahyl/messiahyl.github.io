@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 开发者笔记 — 月流烟渚的技术博客</title>
+<meta name="description" content="AI 变现实战 · Agent 开发 · 大模型测评">
+<meta property="og:title" content="AI 开发者笔记">
+<meta property="og:description" content="AI 变现实战 · Agent 开发 · 大模型测评">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://messiahyl.github.io">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #00F0FF;
+  --primary-dim: #006870;
+  --accent: #FFB800;
+  --bg: #0A0E17;
+  --bg-card: #111827;
+  --bg-card-hover: #162032;
+  --text: #E8EDF5;
+  --muted: #5A6980;
+  --border: #1E2A3A;
+  --font-display: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+  --font-body: 'Noto Sans SC', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+a { color: var(--primary); text-decoration: none; }
+a:hover { opacity: 0.85; }
+
+/* Grid background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Glow orb */
+.glow-orb {
+  position: fixed;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.07;
+  pointer-events: none;
+  z-index: 0;
+}
+.glow-orb.cyan { background: var(--primary); top: -150px; right: -100px; }
+.glow-orb.warm { background: var(--accent); bottom: -200px; left: -150px; opacity: 0.04; }
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+header {
+  padding: 80px 0 40px;
+  border-bottom: 1px solid var(--border);
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.logo-mark {
+  width: 36px; height: 36px;
+  border: 2px solid var(--primary);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--primary);
+}
+.logo h1 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+.site-desc {
+  color: var(--muted);
+  font-size: 15px;
+  max-width: 500px;
+}
+nav {
+  display: flex;
+  gap: 24px;
+  margin-top: 20px;
+  font-size: 14px;
+}
+nav a {
+  color: var(--muted);
+  transition: color 0.2s;
+}
+nav a:hover, nav a.active {
+  color: var(--primary);
+}
+
+/* Article cards */
+.articles {
+  padding: 48px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.card {
+  display: block;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+.card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--primary-dim);
+  transform: translateY(-2px);
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.card-date {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+}
+.card-tags { display: flex; gap: 6px; }
+.tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(0,240,255,0.08);
+  color: var(--primary);
+  border: 1px solid rgba(0,240,255,0.15);
+}
+.card-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.card-excerpt {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Footer */
+footer {
+  padding: 40px 0;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+footer a { color: var(--primary-dim); }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card {
+  animation: fadeIn 0.4s ease both;
+}
+.card:nth-child(2) { animation-delay: 0.08s; }
+.card:nth-child(3) { animation-delay: 0.16s; }
+.card:nth-child(4) { animation-delay: 0.24s; }
+.card:nth-child(5) { animation-delay: 0.32s; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  header { padding: 48px 0 28px; }
+  .card { padding: 20px; }
+  .card-title { font-size: 17px; }
+}
+</style>
+</head>
+<body>
+
+<div class="glow-orb cyan"></div>
+<div class="glow-orb warm"></div>
+
+<div class="container">
+  <header>
+    <div class="logo">
+      <div class="logo-mark">AI</div>
+      <h1>AI 开发者笔记</h1>
+    </div>
+    <p class="site-desc">AI 变现实战 · Agent 开发 · 大模型测评</p>
+    <nav>
+      <a href="/" class="active">文章</a>
+      <a href="/project/" target="_blank">项目</a>
+      <a href="https://github.com/messiahyl" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main class="articles">
+    
+        <a href="/article/01_ai大模型横评_deepseek_claude_doubao.html" class="card">
+            <div class="card-header">
+                <span class="card-date">2026-05-24</span>
+                <div class="card-tags"><span class="tag">["AI横评</span><span class="tag">DeepSeek</span><span class="tag">Claude</span><span class="tag">豆包</span><span class="tag">大模型"]</span></div>
+            </div>
+            <h2 class="card-title">2026 最强 AI 大模型横评：DeepSeek V4 vs Claude 4 vs 豆包，开发者到底该选谁？</h2>
+            <p class="card-excerpt">DeepSeek V4 原生多模态+百万上下文开源炸场，Claude 4 编程智能体可独立运行 7 小时，豆包接入 Seedance 2.0 免费生成视频。到底哪款大模型最适合你？</p>
+        </a>
+        <a href="/article/02_ai_agent元年_manus_mcp_智能体.html" class="card">
+            <div class="card-header">
+                <span class="card-date">2026-05-24</span>
+                <div class="card-tags"><span class="tag">["AI Agent</span><span class="tag">MCP</span><span class="tag">Manus</span><span class="tag">智能体</span><span class="tag">开发者"]</span></div>
+            </div>
+            <h2 class="card-title">AI Agent 元年：MCP 协议、Manus 智能体，以及开发者的下一个风口</h2>
+            <p class="card-excerpt">2026 年是 AI Agent 真正落地的元年。MCP 协议统一了工具调用标准，Manus 展示了通用智能体的潜力，开发者如何抓住这波机会？</p>
+        </a>
+  </main>
+
+  <footer>
+    <p>© 2026 月流烟渚 · Powered by Neon Substrate</p>
+    <p><a href="https://github.com/messiahyl/messiahyl.github.io">Source</a></p>
+  </footer>
+</div>
+
+</body>
+</html>
