@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 开发者笔记 — 月流烟渚的技术博客</title>
+<title>AI 开发者笔记</title>
 <meta name="description" content="AI 变现实战 · Agent 开发 · 大模型测评">
 <meta property="og:title" content="AI 开发者笔记">
 <meta property="og:description" content="AI 变现实战 · Agent 开发 · 大模型测评">
@@ -11,250 +11,340 @@
 <meta property="og:url" content="https://messiahyl.github.io">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=LXGW+WenKai:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* === Design Tokens === */
 :root {
-  --primary: #00F0FF;
-  --primary-dim: #006870;
-  --accent: #FFB800;
-  --bg: #0A0E17;
-  --bg-card: #111827;
-  --bg-card-hover: #162032;
-  --text: #E8EDF5;
-  --muted: #5A6980;
-  --border: #1E2A3A;
-  --font-display: 'Space Grotesk', 'Noto Sans SC', sans-serif;
-  --font-body: 'Noto Sans SC', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --ink: #1C1917;
+  --paper: #FAF9F6;
+  --paper-warm: #F5F0E8;
+  --stone: #78716C;
+  --stone-light: #A8A29E;
+  --accent: #B45309;
+  --accent-light: #D97706;
+  --accent-bg: rgba(180,83,9,0.06);
+  --line: #E7E5E4;
+  --line-dark: #D6D3D1;
+  --serif: 'Noto Serif SC', 'Georgia', 'Times New Roman', serif;
+  --body: 'LXGW WenKai', 'Noto Serif SC', Georgia, serif;
+  --mono: 'JetBrains Mono', 'Menlo', monospace;
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 16px; }
-body {
-  font-family: var(--font-body);
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.7;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-a { color: var(--primary); text-decoration: none; }
-a:hover { opacity: 0.85; }
 
-/* Grid background */
-body::before {
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.8;
+  min-height: 100vh;
+}
+
+/* === Subtle texture via dot pattern === */
+body::after {
   content: '';
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-image:
-    linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
+  inset: 0;
+  background-image: radial-gradient(circle, #d6d3d1 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+  opacity: 0.25;
   pointer-events: none;
   z-index: 0;
 }
 
-/* Glow orb */
-.glow-orb {
-  position: fixed;
-  width: 500px; height: 500px;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.07;
-  pointer-events: none;
-  z-index: 0;
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
-.glow-orb.cyan { background: var(--primary); top: -150px; right: -100px; }
-.glow-orb.warm { background: var(--accent); bottom: -200px; left: -150px; opacity: 0.04; }
+a:hover { color: var(--accent-light); }
 
+/* === Layout === */
 .container {
-  max-width: 800px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 28px;
   position: relative;
   z-index: 1;
 }
 
-/* Header */
-header {
-  padding: 80px 0 40px;
-  border-bottom: 1px solid var(--border);
-}
-.logo {
+/* === Masthead === */
+.masthead {
+  padding: 64px 0 20px;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  align-items: baseline;
+  justify-content: space-between;
 }
-.logo-mark {
-  width: 36px; height: 36px;
-  border: 2px solid var(--primary);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  color: var(--primary);
-}
-.logo h1 {
-  font-family: var(--font-display);
-  font-size: 24px;
+.masthead-title {
+  font-family: var(--serif);
+  font-size: 20px;
   font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.5px;
+  color: var(--ink);
+  letter-spacing: -0.3px;
 }
-.site-desc {
-  color: var(--muted);
-  font-size: 15px;
-  max-width: 500px;
-}
-nav {
+.masthead-title a { color: var(--ink); }
+.masthead-title a:hover { color: var(--accent); }
+.masthead-nav {
   display: flex;
   gap: 24px;
-  margin-top: 20px;
   font-size: 14px;
 }
-nav a {
-  color: var(--muted);
-  transition: color 0.2s;
+.masthead-nav a {
+  color: var(--stone);
+  position: relative;
 }
-nav a:hover, nav a.active {
-  color: var(--primary);
+.masthead-nav a:hover { color: var(--ink); }
+.masthead-nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: var(--accent);
+  transition: width 0.25s ease;
+}
+.masthead-nav a:hover::after { width: 100%; }
+
+/* === Divider === */
+.rule {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 0;
 }
 
-/* Article cards */
-.articles {
-  padding: 48px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+/* === Hero === */
+.hero {
+  padding: 56px 0 48px;
 }
-.card {
-  display: block;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 28px;
-  transition: all 0.25s ease;
-  cursor: pointer;
+.hero-greeting {
+  font-size: 13px;
+  color: var(--stone-light);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  margin-bottom: 12px;
 }
-.card:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--primary-dim);
-  transform: translateY(-2px);
+.hero h1 {
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1.35;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  max-width: 520px;
 }
-.card-header {
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+.hero-desc {
+  margin-top: 16px;
+  font-size: 16px;
+  color: var(--stone);
+  max-width: 460px;
+  line-height: 1.75;
+}
+
+/* === Section === */
+.section-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--stone-light);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
 }
-.card-date {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--muted);
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
 }
-.card-tags { display: flex; gap: 6px; }
-.tag {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(0,240,255,0.08);
-  color: var(--primary);
-  border: 1px solid rgba(0,240,255,0.15);
+
+/* === Article List === */
+.articles {
+  padding: 0 0 64px;
+  display: flex;
+  flex-direction: column;
 }
-.card-title {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text);
+
+.article-item {
+  display: block;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.2s ease;
+  text-decoration: none;
+  position: relative;
+}
+.article-item:last-child { border-bottom: none; }
+.article-item:hover {
+  background: var(--accent-bg);
+  margin: 0 -16px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: 6px;
+  border-color: transparent;
+}
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 8px;
-  line-height: 1.4;
 }
-.card-excerpt {
-  font-size: 14px;
-  color: var(--muted);
-  line-height: 1.6;
+.article-date {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--stone-light);
+}
+.article-separator {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--line-dark);
+}
+.article-tags {
+  display: flex;
+  gap: 6px;
+}
+.tag {
+  font-size: 12px;
+  color: var(--stone);
+  background: var(--paper-warm);
+  padding: 1px 8px;
+  border-radius: 3px;
+}
+
+.article-title {
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.45;
+  letter-spacing: -0.2px;
+  transition: color 0.2s ease;
+}
+.article-item:hover .article-title {
+  color: var(--accent);
+}
+
+.article-excerpt {
+  margin-top: 6px;
+  font-size: 14.5px;
+  color: var(--stone);
+  line-height: 1.7;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* Footer */
+/* === Footer === */
 footer {
-  padding: 40px 0;
-  border-top: 1px solid var(--border);
+  padding: 32px 0 48px;
   text-align: center;
   font-size: 13px;
-  color: var(--muted);
+  color: var(--stone-light);
 }
-footer a { color: var(--primary-dim); }
+footer a { color: var(--stone); }
+footer a:hover { color: var(--accent); }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(16px); }
+/* === Reading progress indicator (decorative top bar) === */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light), var(--accent));
+  opacity: 0.6;
+  z-index: 100;
+}
+
+/* === Animations === */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.card {
-  animation: fadeIn 0.4s ease both;
+.article-item {
+  animation: slideUp 0.35s ease both;
 }
-.card:nth-child(2) { animation-delay: 0.08s; }
-.card:nth-child(3) { animation-delay: 0.16s; }
-.card:nth-child(4) { animation-delay: 0.24s; }
-.card:nth-child(5) { animation-delay: 0.32s; }
+.article-item:nth-child(2) { animation-delay: 0.04s; }
+.article-item:nth-child(3) { animation-delay: 0.08s; }
+.article-item:nth-child(4) { animation-delay: 0.12s; }
+.article-item:nth-child(5) { animation-delay: 0.16s; }
 
-/* Responsive */
+/* === Responsive === */
 @media (max-width: 640px) {
-  header { padding: 48px 0 28px; }
-  .card { padding: 20px; }
-  .card-title { font-size: 17px; }
+  .hero h1 { font-size: 28px; }
+  .article-title { font-size: 18px; }
+  .masthead { padding: 40px 0 16px; }
+  .hero { padding: 36px 0 32px; }
+  .container { padding: 0 20px; }
 }
 </style>
 </head>
 <body>
 
-<div class="glow-orb cyan"></div>
-<div class="glow-orb warm"></div>
+<div class="topbar"></div>
 
 <div class="container">
-  <header>
-    <div class="logo">
-      <div class="logo-mark">AI</div>
-      <h1>AI 开发者笔记</h1>
-    </div>
-    <p class="site-desc">AI 变现实战 · Agent 开发 · 大模型测评</p>
-    <nav>
-      <a href="/" class="active">文章</a>
+  <!-- Masthead -->
+  <div class="masthead">
+    <div class="masthead-title"><a href="/">AI 开发者笔记</a></div>
+    <nav class="masthead-nav">
+      <a href="/">文章</a>
       <a href="/project/" target="_blank">项目</a>
       <a href="https://github.com/messiahyl" target="_blank">GitHub</a>
     </nav>
-  </header>
+  </div>
 
+  <hr class="rule">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-greeting">探索 · 记录 · 分享</div>
+    <h1>以代码丈量<em>技术</em>的深度</h1>
+    <p class="hero-desc">AI 变现实战 · Agent 开发 · 大模型测评。这里记录真实的踩坑经验、产品思考和实践笔记。</p>
+  </section>
+
+  <!-- Articles -->
+  <div class="section-label">近期文章</div>
   <main class="articles">
     
-        <a href="/article/01_ai大模型横评_deepseek_claude_doubao.html" class="card">
-            <div class="card-header">
-                <span class="card-date">2026-05-24</span>
-                <div class="card-tags"><span class="tag">["AI</span><span class="tag">Agent</span><span class="tag">DeepSeek</span><span class="tag">Claude</span><span class="tag">大模型"]</span></div>
+        <a href="/article/01_ai大模型横评_deepseek_claude_doubao.html" class="article-item">
+            <div class="article-meta">
+                <span class="article-date">2026-05-24</span>
+                <span class="article-separator"></span>
+                <div class="article-tags"><span class="tag">["AI</span><span class="tag">Agent</span><span class="tag">DeepSeek</span><span class="tag">Claude</span><span class="tag">大模型"]</span></div>
             </div>
-            <h2 class="card-title">2026 最强 AI 大模型横评：DeepSeek V4 vs Claude 4 vs 豆包，开发者到底该选谁？</h2>
-            <p class="card-excerpt">如果你是一名开发者或内容创作者，2026 年你一定被这些问题困扰：</p>
+            <h2 class="article-title">2026 最强 AI 大模型横评：DeepSeek V4 vs Claude 4 vs 豆包，开发者到底该选谁？</h2>
+            <p class="article-excerpt">如果你是一名开发者或内容创作者，2026 年你一定被这些问题困扰：</p>
         </a>
-        <a href="/article/02_ai_agent元年_manus_mcp_智能体.html" class="card">
-            <div class="card-header">
-                <span class="card-date">2026-05-24</span>
-                <div class="card-tags"><span class="tag">["AI</span><span class="tag">Agent</span><span class="tag">MCP</span><span class="tag">DeepSeek</span><span class="tag">Claude"]</span></div>
+        <a href="/article/02_ai_agent元年_manus_mcp_智能体.html" class="article-item">
+            <div class="article-meta">
+                <span class="article-date">2026-05-24</span>
+                <span class="article-separator"></span>
+                <div class="article-tags"><span class="tag">["AI</span><span class="tag">Agent</span><span class="tag">MCP</span><span class="tag">DeepSeek</span><span class="tag">Claude"]</span></div>
             </div>
-            <h2 class="card-title">2026 AI Agent 元年：从 Manus 到 MCP 协议，智能体如何彻底重塑你的工作方式？</h2>
-            <p class="card-excerpt">先厘清一个概念：大模型 ≠ AI Agent。</p>
+            <h2 class="article-title">2026 AI Agent 元年：从 Manus 到 MCP 协议，智能体如何彻底重塑你的工作方式？</h2>
+            <p class="article-excerpt">先厘清一个概念：大模型 ≠ AI Agent。</p>
         </a>
   </main>
 
   <footer>
-    <p>© 2026 月流烟渚 · Powered by Neon Substrate</p>
-    <p><a href="https://github.com/messiahyl/messiahyl.github.io">Source</a></p>
+    <p>© 2026 月流烟渚 · 用文字沉淀思考</p>
+    <p style="margin-top:4px;"><a href="https://github.com/messiahyl/messiahyl.github.io">源码</a></p>
   </footer>
 </div>
 
