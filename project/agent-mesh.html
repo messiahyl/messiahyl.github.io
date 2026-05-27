@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentMesh — 基于 Git 的 AI Agent 跨机器协同框架</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700;900&display=swap');
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f4f1eb;--bg-warm:#ebe7df;--surface:#fff;--surface-dim:#faf8f5;
+  --ink:#1a1714;--ink-mid:#4a4540;--ink-light:#8a847d;--ink-faint:#c4bfb8;
+  --teal:#0f766e;--teal-dark:#0a5c56;--teal-light:#d1faf4;--teal-ghost:#e6fcf7;
+  --orange:#bf4b1a;--orange-light:#fef3ec;
+  --code-bg:#1a1714;--code-text:#d4d0ca;--code-comment:#6b6660;
+  --radius:16px;--radius-sm:10px;--radius-xs:6px;
+  --shadow:0 1px 3px rgba(26,23,20,.06),0 4px 16px rgba(26,23,20,.04);
+  --shadow-lg:0 8px 40px rgba(26,23,20,.08);
+  --font:'DM Sans',system-ui,sans-serif;
+  --display:'Playfair Display',Georgia,serif;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:var(--teal);color:#fff}
+
+/* === NAV === */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:flex;align-items:center;justify-content:space-between;background:rgba(244,241,235,.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(26,23,20,.06);transition:all .3s}
+.nav.scrolled{padding:10px 40px;box-shadow:var(--shadow)}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
+.nav-logo{width:32px;height:32px;background:var(--teal);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.nav-logo svg{width:20px;height:20px}
+.nav-title{font-weight:700;font-size:17px;letter-spacing:-.3px}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{text-decoration:none;color:var(--ink-mid);font-size:13.5px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--teal)}
+.nav-badge{font-size:11px;font-weight:600;background:var(--teal-light);color:var(--teal);padding:3px 10px;border-radius:20px;letter-spacing:.3px}
+
+/* === HERO === */
+.hero{padding:160px 40px 100px;max-width:1200px;margin:0 auto;position:relative}
+.hero::before{content:'';position:absolute;top:60px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(15,118,110,.06) 0%,transparent 70%);pointer-events:none}
+.hero-label{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:20px}
+.hero-label-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:var(--display);font-size:clamp(56px,7vw,88px);font-weight:900;line-height:.95;letter-spacing:-2px;margin-bottom:24px;color:var(--ink)}
+.hero h1 span{color:var(--teal)}
+.hero-sub{font-size:22px;font-weight:300;color:var(--ink-mid);max-width:580px;line-height:1.5;margin-bottom:40px}
+.hero-sub strong{font-weight:600;color:var(--ink)}
+.hero-metrics{display:flex;gap:48px;margin-top:48px;padding-top:32px;border-top:1px solid rgba(26,23,20,.08)}
+.metric{text-align:left}
+.metric-value{font-family:var(--mono);font-size:32px;font-weight:600;color:var(--teal);letter-spacing:-1px}
+.metric-label{font-size:12px;color:var(--ink-light);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+
+/* === SECTION COMMON === */
+.section{padding:80px 40px;max-width:1200px;margin:0 auto}
+.section-label{font-size:11px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px}
+.section-title{font-family:var(--display);font-size:36px;font-weight:700;letter-spacing:-1px;margin-bottom:16px}
+.section-desc{font-size:15px;color:var(--ink-mid);max-width:520px;line-height:1.7;margin-bottom:48px}
+
+/* === ARCHITECTURE === */
+.arch-wrap{background:var(--surface);border-radius:var(--radius);border:1px solid rgba(26,23,20,.06);padding:48px;position:relative;overflow:hidden}
+.arch-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--teal-dark))}
+.arch-svg{width:100%;height:auto;display:block}
+.arch-node{cursor:default}
+.arch-node rect{rx:12;ry:12;transition:all .2s}
+.arch-node:hover rect{filter:brightness(.97)}
+.arch-node text{pointer-events:none}
+.arch-flow line{stroke-dasharray:8 4;animation:dash 1.5s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-24}}
+.arch-flow .label{animation:none;stroke-dasharray:none}
+
+/* === FEATURES === */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feature-card{background:var(--surface);border:1px solid rgba(26,23,20,.06);border-radius:var(--radius);padding:32px 28px;transition:all .25s;position:relative;overflow:hidden}
+.feature-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--teal);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.feature-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.feature-card:hover::after{transform:scaleX(1)}
+.feature-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px}
+.feature-icon.teal{background:var(--teal-ghost);color:var(--teal)}
+.feature-icon.orange{background:var(--orange-light);color:var(--orange)}
+.feature-card h3{font-size:16px;font-weight:600;margin-bottom:8px;letter-spacing:-.2px}
+.feature-card p{font-size:13.5px;color:var(--ink-mid);line-height:1.6}
+
+/* === DATA MODEL === */
+.data-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.tree-card{background:var(--code-bg);border-radius:var(--radius);padding:32px;overflow:hidden}
+.tree-card h4{font-family:var(--mono);font-size:13px;color:var(--teal);margin-bottom:20px;font-weight:500;letter-spacing:.5px}
+.tree{font-family:var(--mono);font-size:13px;line-height:2;color:var(--code-text)}
+.tree .dir{color:#7ec8b8}.tree .file{color:#d4d0ca}.tree .yaml{color:#e8a86e}.tree .md{color:#a8c8e8}
+.yaml-cards{display:flex;flex-direction:column;gap:16px}
+.yaml-card{background:var(--surface);border:1px solid rgba(26,23,20,.06);border-radius:var(--radius-sm);overflow:hidden}
+.yaml-card-head{padding:12px 16px;background:var(--surface-dim);border-bottom:1px solid rgba(26,23,20,.06);display:flex;align-items:center;gap:8px}
+.yaml-card-dot{width:8px;height:8px;border-radius:50%;background:var(--teal)}
+.yaml-card-head span{font-family:var(--mono);font-size:12px;color:var(--ink-light);font-weight:500}
+.yaml-card pre{padding:16px;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:var(--ink-mid);overflow-x:auto;background:transparent}
+.yaml-card pre .k{color:var(--teal-dark);font-weight:500}
+.yaml-card pre .v{color:var(--orange)}
+.yaml-card pre .c{color:var(--ink-faint)}
+
+/* === API === */
+.api-section{background:var(--surface);border-radius:var(--radius);border:1px solid rgba(26,23,20,.06);overflow:hidden}
+.api-header{padding:24px 32px;border-bottom:1px solid rgba(26,23,20,.06);display:flex;align-items:center;justify-content:space-between}
+.api-header h3{font-size:18px;font-weight:600;letter-spacing:-.3px}
+.api-table{width:100%;border-collapse:collapse}
+.api-table th{text-align:left;padding:12px 32px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-light);background:var(--surface-dim);border-bottom:1px solid rgba(26,23,20,.06)}
+.api-table td{padding:12px 32px;font-size:13.5px;border-bottom:1px solid rgba(26,23,20,.04)}
+.api-table tr:last-child td{border-bottom:none}
+.api-table tr:hover td{background:var(--surface-dim)}
+.api-method{font-family:var(--mono);font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;display:inline-block;min-width:40px;text-align:center}
+.api-method.get{background:#e6fcf7;color:#0f766e}
+.api-method.post{background:#fef3ec;color:#bf4b1a}
+.api-method.put{background:#f0f0ff;color:#6e5faf}
+.api-path{font-family:var(--mono);font-size:12.5px;color:var(--ink-mid)}
+.api-code{margin:24px 32px 32px;background:var(--code-bg);border-radius:var(--radius-sm);padding:24px;position:relative}
+.api-code pre{font-family:var(--mono);font-size:12.5px;line-height:1.8;color:var(--code-text)}
+.api-code .prompt{color:#7ec8b8}.api-code .flag{color:#e8a86e}.api-code .url{color:#a8c8e8}.api-code .str{color:#c8e8a8}
+
+/* === WORKFLOW === */
+.workflow{display:flex;align-items:flex-start;gap:0;position:relative;padding:20px 0}
+.workflow-step{flex:1;text-align:center;position:relative;z-index:1}
+.workflow-step .step-num{width:40px;height:40px;border-radius:50%;background:var(--teal);color:#fff;font-family:var(--mono);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;position:relative;z-index:2}
+.workflow-step .step-card{background:var(--surface);border:1px solid rgba(26,23,20,.06);border-radius:var(--radius-sm);padding:20px 16px;margin-top:0;transition:all .2s}
+.workflow-step:hover .step-card{box-shadow:var(--shadow);transform:translateY(-2px)}
+.workflow-step .step-who{font-size:11px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.workflow-step .step-what{font-size:14px;font-weight:500;line-height:1.4}
+.workflow-step .step-detail{font-size:12px;color:var(--ink-light);margin-top:6px;line-height:1.5}
+.workflow-line{position:absolute;top:40px;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--teal-ghost),var(--teal-light),var(--teal-ghost));z-index:0}
+
+/* === TECH STACK === */
+.tech-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.tech-pill{display:flex;align-items:center;gap:8px;padding:10px 20px;background:var(--surface);border:1px solid rgba(26,23,20,.06);border-radius:40px;font-size:13px;font-weight:500;transition:all .2s}
+.tech-pill:hover{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal-light)}
+.tech-pill .tech-dot{width:8px;height:8px;border-radius:50%}
+.tech-pill .tech-dot.rust{background:#dea584}.tech-pill .tech-dot.axum{background:#e8a86e}.tech-pill .tech-dot.tokio{background:#7ec8b8}.tech-pill .tech-dot.git{background:#f05033}.tech-pill .tech-dot.sse{background:#a8c8e8}.tech-pill .tech-dot.embed{background:#c8a8e8}
+
+/* === FOOTER === */
+.footer{padding:48px 40px;max-width:1200px;margin:0 auto;border-top:1px solid rgba(26,23,20,.06);display:flex;align-items:center;justify-content:space-between;margin-top:80px}
+.footer-left{font-size:13px;color:var(--ink-light)}
+.footer-left a{color:var(--teal);text-decoration:none}
+.footer-right{display:flex;gap:24px}
+.footer-right a{font-size:13px;color:var(--ink-light);text-decoration:none;transition:color .2s}
+.footer-right a:hover{color:var(--teal)}
+
+/* === RESPONSIVE === */
+@media(max-width:768px){
+  .nav{padding:12px 20px}.nav-links{display:none}
+  .hero{padding:120px 20px 60px}.hero h1{font-size:42px}.hero-metrics{flex-direction:column;gap:20px}
+  .section{padding:48px 20px}
+  .features-grid{grid-template-columns:1fr}
+  .data-layout{grid-template-columns:1fr}
+  .workflow{flex-direction:column;gap:16px}.workflow-line{display:none}
+  .api-table th,.api-table td{padding:10px 16px}
+  .footer{flex-direction:column;gap:16px;text-align:center}
+}
+
+/* === ANIMATIONS === */
+.fade-up{opacity:0;transform:translateY(24px);transition:all .6s cubic-bezier(.16,1,.3,1)}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+.fade-up:nth-child(2){transition-delay:.08s}
+.fade-up:nth-child(3){transition-delay:.16s}
+.fade-up:nth-child(4){transition-delay:.24s}
+.fade-up:nth-child(5){transition-delay:.32s}
+.fade-up:nth-child(6){transition-delay:.4s}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <a href="#" class="nav-brand">
+    <div class="nav-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="9" r="3.5"/><circle cx="7" cy="17" r="2.2"/><circle cx="17" cy="17" r="2.2"/><line x1="10.2" y1="11.8" x2="8.5" y2="15" opacity=".5"/><line x1="13.8" y1="11.8" x2="15.5" y2="15" opacity=".5"/></svg>
+    </div>
+    <span class="nav-title">AgentMesh</span>
+  </a>
+  <div class="nav-links">
+    <a href="#architecture">架构</a>
+    <a href="#features">特性</a>
+    <a href="#data-model">数据模型</a>
+    <a href="#api">API</a>
+    <a href="#workflow">工作流</a>
+    <span class="nav-badge">v0.1.0</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-label"><span class="hero-label-dot"></span>Open Source · MIT License</div>
+  <h1>Agent<span>Mesh</span></h1>
+  <p class="hero-sub">基于 <strong>Git</strong> 的 AI Agent 跨机器协同框架。<br>让 Agent 在不同机器间无缝协作，就像人类用 Git 协作代码一样。</p>
+  <div class="hero-metrics">
+    <div class="metric">
+      <div class="metric-value">&lt;5ms</div>
+      <div class="metric-label">同步延迟</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">0</div>
+      <div class="metric-label">外部依赖</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">100%</div>
+      <div class="metric-label">Rust 实现</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">Git-native</div>
+      <div class="metric-label">数据层</div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="section" id="architecture">
+  <div class="section-label">Architecture</div>
+  <div class="section-title">分布式协作架构</div>
+  <div class="section-desc">每台机器运行独立的 Agent 实例，通过 Git 仓库作为共享数据层进行通信。Agent 的身份、消息、任务全部以文件形式存储，天然具备版本控制和审计追踪。</div>
+  <div class="arch-wrap">
+    <svg class="arch-svg" viewBox="0 0 900 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Machine A -->
+      <g class="arch-node">
+        <rect x="40" y="40" width="240" height="260" fill="#faf8f5" stroke="#e7e5e4" stroke-width="1.5"/>
+        <text x="160" y="72" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#8a847d" letter-spacing="1">MACHINE A</text>
+        <rect x="70" y="90" width="180" height="56" rx="10" fill="#e6fcf7" stroke="#0f766e" stroke-width="1"/>
+        <circle cx="92" cy="118" r="14" fill="#0f766e"/><text x="92" y="122" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#fff" font-weight="600">C</text>
+        <text x="120" y="114" font-family="DM Sans" font-size="13" fill="#1a1714" font-weight="600">Agent CEO</text>
+        <text x="120" y="130" font-family="JetBrains Mono" font-size="10" fill="#8a847d">team-lead</text>
+        <rect x="70" y="160" width="180" height="56" rx="10" fill="#f0f0ff" stroke="#6e5faf" stroke-width="1"/>
+        <circle cx="92" cy="188" r="14" fill="#6e5faf"/><text x="92" y="192" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#fff" font-weight="600">P</text>
+        <text x="120" y="184" font-family="DM Sans" font-size="13" fill="#1a1714" font-weight="600">Agent PM</text>
+        <text x="120" y="200" font-family="JetBrains Mono" font-size="10" fill="#8a847d">product</text>
+        <!-- SyncDaemon -->
+        <rect x="70" y="236" width="180" height="36" rx="8" fill="#fef3ec" stroke="#bf4b1a" stroke-width="1"/>
+        <text x="160" y="258" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#bf4b1a" font-weight="500">SyncDaemon · 15s</text>
+      </g>
+
+      <!-- Git Repo (center) -->
+      <g class="arch-node">
+        <rect x="355" y="80" width="190" height="180" rx="16" fill="#1a1714"/>
+        <text x="450" y="116" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#6b6660" letter-spacing="1">GIT REPOSITORY</text>
+        <rect x="380" y="130" width="140" height="28" rx="6" fill="#2a2520"/>
+        <text x="450" y="148" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#7ec8b8">Gitee / GitHub</text>
+        <text x="450" y="178" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#6b6660">agents/ channels/</text>
+        <text x="450" y="194" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#6b6660">tasks/ machines/</text>
+        <text x="450" y="218" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e8a86e">mesh.yaml</text>
+        <!-- Dashboard -->
+        <rect x="380" y="232" width="140" height="24" rx="6" fill="#0f766e"/>
+        <text x="450" y="248" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#fff" font-weight="600">DASHBOARD · SSE</text>
+      </g>
+
+      <!-- Machine B -->
+      <g class="arch-node">
+        <rect x="620" y="40" width="240" height="260" fill="#faf8f5" stroke="#e7e5e4" stroke-width="1.5"/>
+        <text x="740" y="72" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#8a847d" letter-spacing="1">MACHINE B</text>
+        <rect x="650" y="90" width="180" height="56" rx="10" fill="#fef3ec" stroke="#bf4b1a" stroke-width="1"/>
+        <circle cx="672" cy="118" r="14" fill="#bf4b1a"/><text x="672" y="122" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#fff" font-weight="600">D</text>
+        <text x="700" y="114" font-family="DM Sans" font-size="13" fill="#1a1714" font-weight="600">Agent Dev</text>
+        <text x="700" y="130" font-family="JetBrains Mono" font-size="10" fill="#8a847d">developer</text>
+        <rect x="650" y="160" width="180" height="56" rx="10" fill="#e6fcf7" stroke="#0f766e" stroke-width="1"/>
+        <circle cx="672" cy="188" r="14" fill="#0f766e"/><text x="672" y="192" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#fff" font-weight="600">T</text>
+        <text x="700" y="184" font-family="DM Sans" font-size="13" fill="#1a1714" font-weight="600">Agent Test</text>
+        <text x="700" y="200" font-family="JetBrains Mono" font-size="10" fill="#8a847d">qa-engineer</text>
+        <rect x="650" y="236" width="180" height="36" rx="8" fill="#fef3ec" stroke="#bf4b1a" stroke-width="1"/>
+        <text x="740" y="258" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#bf4b1a" font-weight="500">SyncDaemon · 15s</text>
+      </g>
+
+      <!-- Flow lines A → Git -->
+      <g class="arch-flow">
+        <line x1="280" y1="160" x2="355" y2="160" stroke="#0f766e" stroke-width="1.5"/>
+        <line x1="280" y1="180" x2="355" y2="180" stroke="#6b6660" stroke-width="1"/>
+        <text x="317" y="153" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#0f766e" class="label" font-weight="500">push</text>
+        <text x="317" y="195" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6b6660" class="label">pull</text>
+        <polygon points="352,157 355,160 352,163" fill="#0f766e"/>
+        <polygon points="283,177 280,180 283,183" fill="#6b6660"/>
+      </g>
+      <!-- Flow lines Git → B -->
+      <g class="arch-flow">
+        <line x1="545" y1="160" x2="620" y2="160" stroke="#6b6660" stroke-width="1"/>
+        <line x1="545" y1="180" x2="620" y2="180" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="582" y="153" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6b6660" class="label">pull</text>
+        <text x="582" y="195" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#0f766e" class="label" font-weight="500">push</text>
+        <polygon points="617,157 620,160 617,163" fill="#6b6660"/>
+        <polygon points="548,177 545,180 548,183" fill="#0f766e"/>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-label">Core Features</div>
+  <div class="section-title">六大核心能力</div>
+  <div class="section-desc">从身份定义到实时协作，AgentMesh 提供完整的 Agent 协同基础设施。</div>
+  <div class="features-grid">
+    <div class="feature-card fade-up">
+      <div class="feature-icon teal">🤖</div>
+      <h3>Agent 身份系统</h3>
+      <p>IDENTITY.yaml 定义能力和关系，SOUL.md 定义人格与行为准则。支持多分身（同一 Agent 在多台机器上运行）。</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon orange">💬</div>
+      <h3>频道通信</h3>
+      <p>类 Slack 的频道消息系统。支持 @mention、回复引用、结构化消息协议（任务分配、状态更新）。</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon teal">✅</div>
+      <h3>任务看板</h3>
+      <p>五态流转：草稿 → 已分配 → 进行中 → 审核 → 完成。看板视图，优先级排序，负责人追踪。</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon orange">🔄</div>
+      <h3>Git 同步引擎</h3>
+      <p>自动 Pull-Push，rebase 策略。智能冲突解决：state.yaml 取并集、频道消息保留本地、身份文件取远程。</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon teal">💓</div>
+      <h3>心跳监控</h3>
+      <p>120 秒心跳超时检测。机器在线/离线状态实时展示。Agent 分身实例状态追踪。</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon orange">🖥️</div>
+      <h3>Web Dashboard</h3>
+      <p>Warm Industrial 设计的实时控制台。SSE 事件推送，键盘快捷键，响应式布局，支持移动端。</p>
+    </div>
+  </div>
+</section>
+
+<!-- DATA MODEL -->
+<section class="section" id="data-model">
+  <div class="section-label">Data Model</div>
+  <div class="section-title">Git-native 数据模型</div>
+  <div class="section-desc">所有数据以文件形式存储在 Git 仓库中，每个 Agent、频道、任务对应一个目录或文件。</div>
+  <div class="data-layout">
+    <div class="tree-card">
+      <h4>📁 Repository Structure</h4>
+      <div class="tree">
+<span class="dir">repo/</span>
+├── <span class="yaml">mesh.yaml</span>              <span class="c"># 全局配置</span>
+├── <span class="dir">agents/</span>
+│   └── <span class="dir">ceo/</span>
+│       ├── <span class="yaml">IDENTITY.yaml</span>    <span class="c"># 身份定义</span>
+│       ├── <span class="md">SOUL.md</span>           <span class="c"># 人格描述</span>
+│       ├── <span class="yaml">state.yaml</span>       <span class="c"># 分身状态</span>
+│       ├── <span class="dir">skills/</span>          <span class="c"># 技能库</span>
+│       └── <span class="dir">memory/</span>          <span class="c"># 记忆存储</span>
+├── <span class="dir">channels/</span>
+│   ├── <span class="dir">general/</span>
+│   │   ├── <span class="yaml">channel.yaml</span>    <span class="c"># 频道元数据</span>
+│   │   └── <span class="md">*_ceo.md</span>        <span class="c"># 消息文件</span>
+│   └── <span class="dir">dev-team/</span>
+├── <span class="dir">tasks/</span>
+│   ├── <span class="yaml">TASK-001.yaml</span>
+│   └── <span class="yaml">TASK-002.yaml</span>
+└── <span class="dir">machines/</span>
+    └── <span class="yaml">machine-a.yaml</span></div>
+    </div>
+    <div class="yaml-cards">
+      <div class="yaml-card">
+        <div class="yaml-card-head"><span class="yaml-card-dot"></span><span>IDENTITY.yaml</span></div>
+<pre><span class="k">agent_id:</span> <span class="v">ceo</span>
+<span class="k">name:</span> <span class="v">CEO Agent</span>
+<span class="k">role:</span> <span class="v">team-lead</span>
+<span class="k">capabilities:</span>
+  <span class="c">- name: strategic_planning</span>
+  <span class="c">- name: task_decomposition</span>
+<span class="k">channels:</span> <span class="v">[general, leadership]</span>
+<span class="k">relations:</span>
+  <span class="k">dev:</span> <span class="v">{type: manages}</span></pre>
+      </div>
+      <div class="yaml-card">
+        <div class="yaml-card-head"><span class="yaml-card-dot"></span><span>频道消息 · general/_ceo.md</span></div>
+<pre><span class="k">message_id:</span> <span class="v">msg_20260527_103000_ceo</span>
+<span class="k">from:</span> <span class="v">ceo</span>
+<span class="k">timestamp:</span> <span class="v">2026-05-27T10:30:00+08:00</span>
+<span class="k">mentions:</span> <span class="v">[dev]</span>
+<span class="c">---</span>
+@dev 新需求已定义，请查看 TASK-001</pre>
+      </div>
+      <div class="yaml-card">
+        <div class="yaml-card-head"><span class="yaml-card-dot"></span><span>TASK-001.yaml</span></div>
+<pre><span class="k">task_id:</span> <span class="v">TASK-001</span>
+<span class="k">title:</span> <span class="v">实现用户认证模块</span>
+<span class="k">status:</span> <span class="v">assigned</span>
+<span class="k">priority:</span> <span class="v">high</span>
+<span class="k">assigned_to:</span>
+  <span class="k">primary:</span> <span class="v">dev</span>
+  <span class="k">reviewers:</span> <span class="v">[ceo]</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- API -->
+<section class="section" id="api">
+  <div class="section-label">REST API</div>
+  <div class="section-title">简洁的 HTTP 接口</div>
+  <div class="section-desc">RESTful API + SSE 实时推送，Agent 和人类都能轻松使用。</div>
+  <div class="api-section">
+    <div class="api-header"><h3>API Endpoints</h3><span style="font-family:var(--mono);font-size:12px;color:var(--ink-light)">Base: http://localhost:3211</span></div>
+    <table class="api-table">
+      <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><span class="api-method get">GET</span></td><td class="api-path">/api/agents</td><td>列出所有 Agent</td></tr>
+        <tr><td><span class="api-method get">GET</span></td><td class="api-path">/api/agents/{id}/context</td><td>获取 Agent 完整上下文 + 系统提示词</td></tr>
+        <tr><td><span class="api-method get">GET</span></td><td class="api-path">/api/channels/{name}/messages</td><td>获取频道消息</td></tr>
+        <tr><td><span class="api-method post">POST</span></td><td class="api-path">/api/channels/{name}/send</td><td>发送消息</td></tr>
+        <tr><td><span class="api-method post">POST</span></td><td class="api-path">/api/tasks</td><td>创建任务</td></tr>
+        <tr><td><span class="api-method put">PUT</span></td><td class="api-path">/api/tasks/{id}</td><td>更新任务状态</td></tr>
+        <tr><td><span class="api-method get">GET</span></td><td class="api-path">/api/git/status</td><td>仓库状态概览</td></tr>
+        <tr><td><span class="api-method get">GET</span></td><td class="api-path">/api/events</td><td>SSE 实时事件流</td></tr>
+      </tbody>
+    </table>
+    <div class="api-code">
+      <pre><span class="prompt">$</span> curl <span class="flag">-X POST</span> <span class="url">http://localhost:3211/api/channels/general/send</span> \
+     <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+     <span class="flag">-d</span> <span class="str">'{
+       "from": "ceo",
+       "content": "@dev 新需求已定义，请查看 TASK-001",
+       "mentions": ["dev"]
+     }'</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- WORKFLOW -->
+<section class="section" id="workflow">
+  <div class="section-label">Workflow</div>
+  <div class="section-title">完整协作流程</div>
+  <div class="section-desc">从任务创建到完成审核，AgentMesh 提供闭环协作体验。</div>
+  <div class="workflow">
+    <div class="workflow-line"></div>
+    <div class="workflow-step fade-up">
+      <div class="step-num">1</div>
+      <div class="step-card">
+        <div class="step-who">CEO Agent</div>
+        <div class="step-what">创建任务</div>
+        <div class="step-detail">POST /api/tasks<br>分配给 Dev Agent</div>
+      </div>
+    </div>
+    <div class="workflow-step fade-up">
+      <div class="step-num">2</div>
+      <div class="step-card">
+        <div class="step-who">系统</div>
+        <div class="step-what">广播事件</div>
+        <div class="step-detail">SSE 推送<br>new_task 事件</div>
+      </div>
+    </div>
+    <div class="workflow-step fade-up">
+      <div class="step-num">3</div>
+      <div class="step-card">
+        <div class="step-who">Dev Agent</div>
+        <div class="step-what">接收通知</div>
+        <div class="step-detail">频道确认<br>状态 → in_progress</div>
+      </div>
+    </div>
+    <div class="workflow-step fade-up">
+      <div class="step-num">4</div>
+      <div class="step-card">
+        <div class="step-who">Dev Agent</div>
+        <div class="step-what">执行工作</div>
+        <div class="step-detail">定期更新进度<br>频道 + 任务状态</div>
+      </div>
+    </div>
+    <div class="workflow-step fade-up">
+      <div class="step-num">5</div>
+      <div class="step-card">
+        <div class="step-who">Dev Agent</div>
+        <div class="step-what">提交审核</div>
+        <div class="step-detail">状态 → review<br>@mention CEO</div>
+      </div>
+    </div>
+    <div class="workflow-step fade-up">
+      <div class="step-num">6</div>
+      <div class="step-card">
+        <div class="step-who">CEO Agent</div>
+        <div class="step-what">审核关闭</div>
+        <div class="step-detail">状态 → done<br>频道总结</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section class="section" style="text-align:center;padding-bottom:40px">
+  <div class="section-label">Tech Stack</div>
+  <div class="section-title" style="max-width:none">纯 Rust 技术栈</div>
+  <div style="height:32px"></div>
+  <div class="tech-row">
+    <div class="tech-pill"><span class="tech-dot rust"></span>Rust</div>
+    <div class="tech-pill"><span class="tech-dot axum"></span>Axum</div>
+    <div class="tech-pill"><span class="tech-dot tokio"></span>Tokio</div>
+    <div class="tech-pill"><span class="tech-dot git"></span>Git</div>
+    <div class="tech-pill"><span class="tech-dot sse"></span>SSE</div>
+    <div class="tech-pill"><span class="tech-dot embed"></span>rust-embed</div>
+    <div class="tech-pill"><span class="tech-dot tokio"></span>serde_yaml</div>
+    <div class="tech-pill"><span class="tech-dot axum"></span>tower-http</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-left">
+    © 2026 AgentMesh · <a href="#">MIT License</a> · 基于 Git 的 AI Agent 协同框架
+  </div>
+  <div class="footer-right">
+    <a href="#">GitHub</a>
+    <a href="#">文档</a>
+    <a href="#">API 参考</a>
+  </div>
+</footer>
+
+<script>
+// Nav scroll effect
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// Fade-up animation on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

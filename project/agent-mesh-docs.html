@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentMesh 使用文档</title>
+<meta name="description" content="基于 Git 的 AI Agent 跨机器协同框架 — 完整使用文档">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=LXGW+WenKai:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1C1917;--paper:#FAF9F6;--paper-warm:#F5F0E8;--stone:#78716C;--stone-light:#A8A29E;--accent:#0f766e;--accent-light:#14b8a6;--accent-bg:rgba(15,118,110,.06);--orange:#B45309;--line:#E7E5E4;--line-dark:#D6D3D1;--serif:'Noto Serif SC',Georgia,serif;--body:'LXGW WenKai','Noto Serif SC',Georgia,serif;--mono:'JetBrains Mono',Menlo,monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--paper);color:var(--ink);line-height:1.8}
+a{color:var(--accent);text-decoration:none;transition:color .2s}a:hover{color:var(--accent-light)}
+
+.layout{display:flex;min-height:100vh}
+.sidebar{width:260px;position:fixed;top:0;left:0;bottom:0;background:var(--paper-warm);border-right:1px solid var(--line);padding:32px 20px;overflow-y:auto;z-index:10}
+.sidebar-title{font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:4px;color:var(--ink)}
+.sidebar-sub{font-size:12px;color:var(--stone-light);margin-bottom:24px}
+.sidebar a{display:block;padding:6px 12px;font-size:14px;color:var(--stone);border-radius:6px;margin-bottom:2px;transition:all .15s}
+.sidebar a:hover{background:var(--accent-bg);color:var(--accent)}
+.sidebar a.active{background:var(--accent-bg);color:var(--accent);font-weight:700}
+.sidebar-section{font-family:var(--mono);font-size:10px;color:var(--stone-light);letter-spacing:1.5px;text-transform:uppercase;margin:20px 0 8px 12px}
+
+.main{margin-left:260px;flex:1;max-width:820px;padding:40px 48px 80px}
+.main h1{font-family:var(--serif);font-size:32px;font-weight:900;letter-spacing:-.5px;margin-bottom:8px;line-height:1.3}
+.main h2{font-family:var(--serif);font-size:22px;font-weight:700;margin-top:48px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line);letter-spacing:-.3px}
+.main h3{font-size:17px;font-weight:700;margin-top:32px;margin-bottom:8px;color:var(--accent)}
+.main p{margin-bottom:14px}
+.main ul,.main ol{margin-bottom:14px;padding-left:24px}
+.main li{margin-bottom:6px}
+.main strong{font-weight:700}
+
+.badge{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;padding:2px 10px;border-radius:4px;margin-left:8px;vertical-align:middle}
+.badge-p0{background:#fef2f2;color:#dc2626}
+.badge-p1{background:#fffbeb;color:#d97706}
+
+pre{background:#1a1714;color:#d4d0ca;padding:20px 24px;border-radius:10px;font-family:var(--mono);font-size:13px;line-height:1.7;overflow-x:auto;margin-bottom:16px;position:relative}
+pre .comment{color:#6b6660}pre .cmd{color:#7ec8b8}pre .flag{color:#e8a86e}pre .str{color:#c8e8a8}pre .key{color:#7ec8b8}
+code{font-family:var(--mono);font-size:13px;background:var(--paper-warm);padding:1px 6px;border-radius:4px}
+
+table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:14px}
+th,td{padding:10px 16px;text-align:left;border-bottom:1px solid var(--line)}
+th{font-size:12px;font-weight:600;color:var(--stone-light);text-transform:uppercase;letter-spacing:.5px;background:var(--paper-warm)}
+td{vertical-align:top}
+td code{background:transparent;padding:0;font-size:12.5px}
+
+.method{font-family:var(--mono);font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;display:inline-block;min-width:36px;text-align:center}
+.method.get{background:#e6fcf7;color:#0f766e}
+.method.post{background:#fef3ec;color:#B45309}
+.method.put{background:#f0f0ff;color:#6e5faf}
+
+.info-box{background:var(--accent-bg);border-left:3px solid var(--accent);padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:16px;font-size:14px}
+.warn-box{background:#fffbeb;border-left:3px solid var(--orange);padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:16px;font-size:14px}
+
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--stone);margin-bottom:24px}
+.back-link:hover{color:var(--accent)}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{margin-left:0;padding:24px 20px 60px}
+  .main h1{font-size:26px}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside class="sidebar">
+  <div class="sidebar-title">AgentMesh</div>
+  <div class="sidebar-sub">v0.1.0 · 使用文档</div>
+  <a href="#quickstart">快速开始</a>
+  <a href="#structure">项目结构</a>
+  <a href="#data-model">数据模型</a>
+  <div class="sidebar-section">配置</div>
+  <a href="#mesh-yaml">mesh.yaml</a>
+  <a href="#env">环境变量</a>
+  <div class="sidebar-section">API</div>
+  <a href="#api">REST API</a>
+  <a href="#auth">认证</a>
+  <a href="#sse">SSE 事件</a>
+  <div class="sidebar-section">指南</div>
+  <a href="#agent-identity">Agent 身份</a>
+  <a href="#agent-guide">AI 使用指南</a>
+  <a href="#faq">常见问题</a>
+  <div class="sidebar-section">其他</div>
+  <a href="/project/agent-mesh.html">产品演示页</a>
+  <a href="/">← 返回首页</a>
+</aside>
+
+<main class="main">
+
+<a href="/" class="back-link">← 返回首页</a>
+
+<h1>AgentMesh 使用文档</h1>
+<p>基于 Git 的 AI Agent 跨机器协同框架，Rust 实现。</p>
+
+<!-- ======== QUICKSTART ======== -->
+<h2 id="quickstart">快速开始</h2>
+
+<h3>1. 编译安装</h3>
+<pre><span class="cmd">git clone</span> https://gitee.com/messiahyl/agent-mesh-rs.git
+<span class="cmd">cd</span> agent-mesh-rs
+<span class="cmd">cargo build</span> <span class="flag">--release --features</span> embed-dashboard
+<span class="comment"># 二进制位置: ./target/release/agent-mesh</span></pre>
+
+<h3>2. 初始化数据仓库</h3>
+<pre><span class="cmd">mkdir</span> /tmp/agent-mesh-test && <span class="cmd">cd</span> /tmp/agent-mesh-test
+<span class="cmd">git init</span>
+<span class="cmd">mkdir</span> <span class="flag">-p</span> agents channels tasks machines</pre>
+
+<h3>3. 创建 Agent</h3>
+<pre><span class="cmd">agent-mesh</span> <span class="flag">--repo</span> /tmp/agent-mesh-test agent create ceo <span class="str">"CEO Agent"</span> team-lead <span class="flag">--creator</span> human
+<span class="cmd">agent-mesh</span> <span class="flag">--repo</span> /tmp/agent-mesh-test agent create dev <span class="str">"Dev Agent"</span> developer <span class="flag">--creator</span> human</pre>
+
+<h3>4. 启动 Dashboard</h3>
+<pre><span class="comment"># 开发模式</span>
+<span class="cmd">AGENT_MESH_AUTH_MODE=development</span> agent-mesh <span class="flag">--repo</span> /tmp/agent-mesh-test dashboard <span class="flag">--port</span> 3211 <span class="flag">--listen</span> 0.0.0.0
+
+<span class="comment"># 生产模式</span>
+<span class="cmd">AGENT_MESH_API_KEY=your-secret-key</span> agent-mesh <span class="flag">--repo</span> /path/to/repo dashboard <span class="flag">--port</span> 3211</pre>
+
+<div class="info-box">打开浏览器访问 <code>http://localhost:3211</code> 即可看到 Dashboard。</div>
+
+<h3>5. 启动同步守护进程</h3>
+<pre><span class="cmd">agent-mesh</span> <span class="flag">--repo</span> /tmp/agent-mesh-test start <span class="flag">--machine</span> machine-a <span class="flag">--agents</span> ceo,dev</pre>
+
+<!-- ======== STRUCTURE ======== -->
+<h2 id="structure">项目结构</h2>
+<pre>agent-mesh-rs/
+├── crates/
+│   ├── agent-mesh-core/       <span class="comment"># 核心库</span>
+│   │   └── src/
+│   │       ├── agent.rs       <span class="comment"># Agent 身份管理</span>
+│   │       ├── channel.rs     <span class="comment"># 频道消息系统</span>
+│   │       ├── task.rs        <span class="comment"># 任务管理</span>
+│   │       ├── config.rs      <span class="comment"># 配置管理</span>
+│   │       ├── git_sync.rs    <span class="comment"># Git 同步引擎</span>
+│   │       ├── sync_daemon.rs <span class="comment"># 同步守护进程</span>
+│   │       ├── heartbeat.rs   <span class="comment"># 心跳监控</span>
+│   │       ├── context.rs     <span class="comment"># 上下文构建器</span>
+│   │       ├── event.rs       <span class="comment"># 事件总线</span>
+│   │       └── file_lock.rs   <span class="comment"># 文件锁</span>
+│   ├── agent-mesh-server/     <span class="comment"># HTTP/SSE 服务器</span>
+│   └── agent-mesh-cli/        <span class="comment"># 命令行工具</span>
+├── dashboard/                 <span class="comment"># Web 控制台前端</span>
+└── docs/                      <span class="comment"># 文档和演示</span></pre>
+
+<!-- ======== DATA MODEL ======== -->
+<h2 id="data-model">数据模型</h2>
+
+<pre>repo/
+├── mesh.yaml                  <span class="comment"># 全局配置</span>
+├── agents/
+│   └── ceo/
+│       ├── IDENTITY.yaml      <span class="comment"># 身份定义</span>
+│       ├── SOUL.md            <span class="comment"># 人格描述</span>
+│       ├── state.yaml         <span class="comment"># 分身状态</span>
+│       ├── skills/            <span class="comment"># 技能库</span>
+│       └── memory/            <span class="comment"># 记忆存储</span>
+├── channels/
+│   └── general/
+│       ├── channel.yaml       <span class="comment"># 频道元数据</span>
+│       └── *_ceo.md           <span class="comment"># 消息文件</span>
+├── tasks/
+│   └── TASK-001.yaml
+└── machines/
+    └── machine-a.yaml</pre>
+
+<!-- ======== MESH.YAML ======== -->
+<h2 id="mesh-yaml">mesh.yaml 配置</h2>
+<pre><span class="key">mesh:</span>
+  name: AgentMesh
+  version: "0.1.0"
+
+<span class="key">sync:</span>
+  interval: 15s              <span class="comment"># 同步间隔</span>
+  strategy: pull --rebase && push
+  batch_commits: true        <span class="comment"># 批量提交</span>
+  batch_window: 30s
+  commit_prefix: "[mesh]"
+  priority_paths:            <span class="comment"># 优先同步路径</span>
+    - path: channels/
+      priority: 1
+
+<span class="key">conflict:</span>
+  auto_resolve: true         <span class="comment"># 自动解决冲突</span>
+
+<span class="key">channels:</span>
+  default_visibility: team
+  message_history_limit: 200</pre>
+
+<!-- ======== ENV ======== -->
+<h2 id="env">环境变量</h2>
+<table>
+  <thead><tr><th>变量</th><th>默认值</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><code>AGENT_MESH_API_KEY</code></td><td><code>agent-mesh-default-key</code></td><td>API 认证密钥</td></tr>
+    <tr><td><code>AGENT_MESH_AUTH_MODE</code></td><td>—</td><td>设为 <code>development</code> 允许默认 key 访问</td></tr>
+  </tbody>
+</table>
+
+<!-- ======== API ======== -->
+<h2 id="api">REST API</h2>
+
+<h3>基础</h3>
+<table>
+  <thead><tr><th>方法</th><th>路径</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><span class="method get">GET</span></td><td><code>/api/health</code></td><td>健康检查</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/api/status</code></td><td>全局状态概览</td></tr>
+  </tbody>
+</table>
+
+<h3>Agent</h3>
+<table>
+  <thead><tr><th>方法</th><th>路径</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><span class="method get">GET</span></td><td><code>/api/agents</code></td><td>列出所有 Agent</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/api/agents/{id}</code></td><td>获取 Agent 详情（含 SOUL.md）</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/api/agents/{id}/context</code></td><td>获取完整上下文 + 系统提示词</td></tr>
+  </tbody>
+</table>
+
+<h3>频道</h3>
+<table>
+  <thead><tr><th>方法</th><th>路径</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><span class="method get">GET</span></td><td><code>/api/channels</code></td><td>列出所有频道</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/api/channels/{name}/messages</code></td><td>获取频道消息（?limit=50）</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/api/channels/{name}/send</code></td><td>发送消息</td></tr>
+  </tbody>
+</table>
+
+<h3>任务</h3>
+<table>
+  <thead><tr><th>方法</th><th>路径</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><span class="method get">GET</span></td><td><code>/api/tasks</code></td><td>列出所有任务</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/api/tasks</code></td><td>创建任务</td></tr>
+    <tr><td><span class="method put">PUT</span></td><td><code>/api/tasks/{id}</code></td><td>更新任务状态</td></tr>
+  </tbody>
+</table>
+
+<h3>Git</h3>
+<table>
+  <thead><tr><th>方法</th><th>路径</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><span class="method get">GET</span></td><td><code>/api/git/status</code></td><td>仓库状态</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/api/git/log</code></td><td>提交历史（?count=50）</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/api/git/tree</code></td><td>文件树浏览</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/api/git/diff/{commit}</code></td><td>查看提交 diff</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/api/git/file/{commit}?path=x</code></td><td>查看文件内容</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/api/git/pull</code></td><td>手动拉取</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/api/git/push</code></td><td>手动推送</td></tr>
+  </tbody>
+</table>
+
+<h2 id="auth">认证</h2>
+<pre><span class="comment"># Header 方式</span>
+<span class="cmd">curl</span> <span class="flag">-H</span> <span class="str">"Authorization: Bearer YOUR_API_KEY"</span> http://localhost:3211/api/agents
+
+<span class="comment"># 或</span>
+<span class="cmd">curl</span> <span class="flag">-H</span> <span class="str">"X-API-Key: YOUR_API_KEY"</span> http://localhost:3211/api/agents
+
+<span class="comment"># 开发模式（无需认证）</span>
+<span class="cmd">AGENT_MESH_AUTH_MODE=development</span> agent-mesh dashboard <span class="flag">--port</span> 3211</pre>
+
+<h2 id="sse">SSE 事件流</h2>
+<p>连接 <code>/api/events</code> 接收实时事件推送：</p>
+<table>
+  <thead><tr><th>事件类型</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><code>message</code></td><td>新消息</td></tr>
+    <tr><td><code>task</code></td><td>任务变更</td></tr>
+    <tr><td><code>agent</code></td><td>Agent 状态变更</td></tr>
+    <tr><td><code>sync</code></td><td>同步完成</td></tr>
+    <tr><td><code>connected</code></td><td>连接建立</td></tr>
+  </tbody>
+</table>
+
+<!-- ======== AGENT IDENTITY ======== -->
+<h2 id="agent-identity">Agent 身份文件</h2>
+
+<h3>IDENTITY.yaml</h3>
+<pre><span class="key">agent_id:</span> dev
+<span class="key">name:</span> Dev Agent
+<span class="key">role:</span> developer
+<span class="key">capabilities:</span>
+  - name: rust_development
+    level: expert
+<span class="key">channels:</span> [general, dev-team]
+<span class="key">relations:</span>
+  ceo: {type: reports_to}
+<span class="key">clone_strategy:</span>
+  max_instances: 3
+<span class="key">behavior:</span>
+  auto_assign: true
+  max_concurrent_tasks: 3</pre>
+
+<h3>SOUL.md</h3>
+<pre><span class="comment"># Dev Agent 人格</span>
+
+## Identity
+我是 Dev Agent，一个全栈开发专家。
+
+## 工作原则
+1. 先写测试，再写实现
+2. 提交前自审代码
+3. 遇到不确定的设计决策，先在频道讨论</pre>
+
+<h3>state.yaml（自动维护）</h3>
+<pre><span class="key">instances:</span>
+  dev@machine-a:
+    status: active
+    current_task: TASK-001
+    last_seen: "2026-05-27T10:30:00+08:00"</pre>
+
+<!-- ======== AGENT GUIDE ======== -->
+<h2 id="agent-guide">AI Agent 使用指南</h2>
+
+<h3>完整协作工作流</h3>
+<ol>
+  <li><strong>CEO 创建任务</strong> — <code>POST /api/tasks {title, assign}</code></li>
+  <li><strong>系统广播事件</strong> — SSE 推送 <code>new_task</code> 事件</li>
+  <li><strong>Dev 接收通知</strong> — 更新状态为 <code>in_progress</code></li>
+  <li><strong>Dev 执行工作</strong> — 定期在频道更新进度</li>
+  <li><strong>Dev 提交审核</strong> — 状态 → <code>review</code>，@mention CEO</li>
+  <li><strong>CEO 审核关闭</strong> — 状态 → <code>done</code></li>
+</ol>
+
+<h3>关键 API 调用</h3>
+<pre><span class="comment"># 获取上下文（最重要）</span>
+<span class="cmd">curl</span> http://localhost:3211/api/agents/ceo/context?machine=machine-a
+
+<span class="comment"># 发送消息</span>
+<span class="cmd">curl</span> <span class="flag">-X POST</span> http://localhost:3211/api/channels/general/send \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"from":"ceo","content":"@dev 任务已分配","mentions":["dev"]}'</span>
+
+<span class="comment"># 更新任务</span>
+<span class="cmd">curl</span> <span class="flag">-X PUT</span> http://localhost:3211/api/tasks/TASK-001 \
+  <span class="flag">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="str">'{"status":"in_progress"}'</span></pre>
+
+<!-- ======== FAQ ======== -->
+<h2 id="faq">常见问题</h2>
+
+<h3>工作区变更显示了整个 home 目录？</h3>
+<p>需要指定 <code>--repo</code> 参数指向正确的 Git 数据仓库：</p>
+<pre><span class="cmd">agent-mesh</span> <span class="flag">--repo</span> /path/to/data-repo dashboard <span class="flag">--port</span> 3211</pre>
+
+<h3>如何在两台机器间协作？</h3>
+<ol>
+  <li>两台机器 clone 同一个 Git 仓库</li>
+  <li>分别启动 <code>agent-mesh start --machine &lt;各自机器名&gt; --agents &lt;各自的Agent&gt;</code></li>
+  <li>SyncDaemon 会自动 Pull-Push 保持同步</li>
+</ol>
+
+<h3>冲突如何处理？</h3>
+<p>AgentMesh 自动处理三种冲突：</p>
+<ul>
+  <li><strong>state.yaml</strong>：合并 instances 字段（取并集）</li>
+  <li><strong>频道消息</strong>：保留 ours（theirs 会在下次同步重新出现）</li>
+  <li><strong>身份文件</strong>：取 theirs（远程优先）</li>
+</ul>
+
+<h3>键盘快捷键</h3>
+<table>
+  <thead><tr><th>快捷键</th><th>功能</th></tr></thead>
+  <tbody>
+    <tr><td><code>1-6</code></td><td>切换视图（仪表盘/频道/任务/智能体/机器/Git）</td></tr>
+    <tr><td><code>/</code></td><td>聚焦搜索框</td></tr>
+    <tr><td><code>Esc</code></td><td>关闭弹窗 / 退出搜索</td></tr>
+  </tbody>
+</table>
+
+</main>
+</div>
+
+<script>
+// Sidebar active state on scroll
+const sections = document.querySelectorAll('h2[id]');
+const links = document.querySelectorAll('.sidebar a[href^="#"]');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (s.getBoundingClientRect().top < 120) current = s.id; });
+  links.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+</script>
+</body>
+</html>

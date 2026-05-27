@@ -318,6 +318,29 @@ footer a:hover { color: var(--accent); }
     <p class="hero-desc">AI 变现实战 · Agent 开发 · 大模型测评。这里记录真实的踩坑经验、产品思考和实践笔记。</p>
   </section>
 
+  <!-- Projects -->
+  <div class="section-label">开源项目</div>
+  <div style="padding:0 0 48px;display:flex;flex-direction:column;gap:16px">
+
+    <a href="/project/agent-mesh.html" style="display:block;padding:24px 0;border-bottom:1px solid var(--line);text-decoration:none;transition:background .2s;position:relative" onmouseover="this.style.background='var(--accent-bg)';this.style.marginLeft='-16px';this.style.paddingLeft='16px';this.style.borderRadius='6px'" onmouseout="this.style.background='';this.style.marginLeft='';this.style.paddingLeft='';this.style.borderRadius=''">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-family:var(--mono);font-size:12px;color:var(--stone-light)">2026-05-27</span>
+        <span style="width:3px;height:3px;border-radius:50%;background:var(--line-dark)"></span>
+        <span style="font-size:12px;color:var(--stone);background:var(--paper-warm);padding:1px 8px;border-radius:3px">Rust</span>
+        <span style="font-size:12px;color:var(--stone);background:var(--paper-warm);padding:1px 8px;border-radius:3px">AI Agent</span>
+        <span style="font-size:12px;color:var(--stone);background:var(--paper-warm);padding:1px 8px;border-radius:3px">Git</span>
+      </div>
+      <h2 style="font-family:var(--serif);font-size:21px;font-weight:700;color:var(--ink);line-height:1.45;letter-spacing:-0.2px">AgentMesh — 基于 Git 的 AI Agent 跨机器协同框架</h2>
+      <p style="margin-top:6px;font-size:14.5px;color:var(--stone);line-height:1.7">纯 Rust 实现的轻量级框架，让多个 AI Agent 通过 Git 仓库协同工作。频道通信、任务看板、自动同步、心跳监控，开箱即用。</p>
+      <div style="margin-top:10px;display:flex;gap:12px">
+        <span style="font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:500">产品演示 →</span>
+        <span style="font-family:var(--mono);font-size:12px;color:var(--stone-light)">|</span>
+        <a href="/project/agent-mesh-docs.html" style="font-family:var(--mono);font-size:12px;color:var(--accent)">使用文档 →</a>
+      </div>
+    </a>
+
+  </div>
+
   <!-- Articles -->
   <div class="section-label">近期文章</div>
   <main class="articles">
