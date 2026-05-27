@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>项目 — 月流烟渚</title>
+<title>文章 — 月流烟渚</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;600;700;900&family=LXGW+WenKai:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -32,7 +32,6 @@ a:hover{color:var(--cinnabar-light)}
 body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#c4bfb8 .4px,transparent .4px);background-size:20px 20px;opacity:.18;pointer-events:none;z-index:0}
 .wrap{max-width:800px;margin:0 auto;padding:0 32px;position:relative;z-index:1}
 
-/* 统一导航 */
 .site-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);background:rgba(250,248,244,.75);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);border-bottom:1px solid transparent;transition:background .35s,border-color .35s,box-shadow .35s}
 .site-nav.scrolled{background:rgba(250,248,244,.95);border-bottom-color:var(--line);box-shadow:0 1px 12px rgba(44,36,32,.05)}
 .nav-inner{display:flex;align-items:center;justify-content:space-between;height:100%;max-width:1100px;margin:0 auto;padding:0 32px}
@@ -50,35 +49,36 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .page-header h1{font-family:var(--serif);font-size:32px;font-weight:700;color:var(--ink);letter-spacing:-.5px;margin-bottom:8px}
 .page-header p{font-size:16px;color:var(--ink-light);max-width:480px}
 
-.section-label{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:12px}
-.section-label::after{content:'';flex:1;height:1px;background:var(--line)}
+.article-list{display:flex;flex-direction:column}
+.article-item{display:flex;gap:24px;padding:28px 0;border-bottom:1px solid var(--line);text-decoration:none;transition:all .25s;align-items:flex-start}
+.article-item:last-child{border-bottom:none}
+.article-item:hover{background:var(--cinnabar-bg);margin:0 -16px;padding-left:16px;padding-right:16px;border-radius:8px;border-color:transparent}
 
-.project-card{display:block;padding:28px 0;border-bottom:1px solid var(--line);text-decoration:none;transition:all .25s;position:relative}
-.project-card:last-child{border-bottom:none}
-.project-card:hover{background:var(--cinnabar-bg);margin:0 -16px;padding-left:16px;padding-right:16px;border-radius:8px;border-color:transparent}
-.project-meta{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.project-date{font-family:var(--mono);font-size:12px;color:var(--ink-faint)}
-.project-tags{display:flex;gap:6px}
-.project-tags span{font-size:12px;color:var(--sage);background:var(--sage-bg);padding:2px 10px;border-radius:10px;font-weight:500}
-.project-title{font-family:var(--serif);font-size:21px;font-weight:700;color:var(--ink);line-height:1.45;letter-spacing:-.2px;transition:color .2s}
-.project-card:hover .project-title{color:var(--cinnabar)}
-.project-excerpt{margin-top:6px;font-size:14.5px;color:var(--ink-light);line-height:1.7}
-.project-links{margin-top:10px;display:flex;gap:12px}
-.project-links span{font-family:var(--mono);font-size:12px;color:var(--cinnabar);font-weight:500}
+.article-date-block{flex-shrink:0;width:56px;text-align:center;padding-top:2px}
+.article-date-day{font-family:var(--display);font-size:28px;font-weight:700;color:var(--ink);line-height:1}
+.article-date-month{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:1px;margin-top:4px}
+.article-body{flex:1}
+.article-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink);line-height:1.45;margin-bottom:6px;transition:color .2s}
+.article-item:hover .article-title{color:var(--cinnabar)}
+.article-excerpt{font-size:14px;color:var(--ink-light);line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:10px}
+.article-meta-tags{display:flex;gap:6px;flex-wrap:wrap}
+.article-meta-tags span{font-size:11px;color:var(--sage);background:var(--sage-bg);padding:2px 10px;border-radius:10px;font-weight:500}
 
-footer{padding:48px 0;text-align:center;font-size:13px;color:var(--ink-faint);margin-top:40px}
+footer{padding:48px 0;text-align:center;font-size:13px;color:var(--ink-faint);margin-top:40px;border-top:1px solid var(--line)}
 footer a{color:var(--ink-light)}
 footer a:hover{color:var(--cinnabar)}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.project-card{animation:fadeUp .35s ease both}
-.project-card:nth-child(2){animation-delay:.04s}
-.project-card:nth-child(3){animation-delay:.08s}
+.article-item{animation:fadeUp .35s ease both}
+.article-item:nth-child(2){animation-delay:.04s}
+.article-item:nth-child(3){animation-delay:.08s}
 
 @media(max-width:768px){
   .nav-toggle{display:block}
   .nav-links{position:fixed;top:var(--nav-h);left:0;right:0;background:rgba(250,248,244,.98);backdrop-filter:blur(20px);flex-direction:column;padding:24px 32px;gap:20px;border-bottom:1px solid var(--line);transform:translateY(-120%);opacity:0;transition:transform .35s ease,opacity .35s ease}
   .nav-links.open{transform:translateY(0);opacity:1}
+  .article-item{flex-direction:column;gap:12px}
+  .article-date-block{width:auto;text-align:left;display:flex;gap:8px;align-items:baseline}
 }
 @media(max-width:640px){
   :root{--nav-h:56px}
@@ -95,8 +95,8 @@ footer a:hover{color:var(--cinnabar)}
     <a class="nav-brand" href="/">月流烟渚</a>
     <div class="nav-links" id="navLinks">
       <a href="/">主页</a>
-      <a href="/article/">文章</a>
-      <a href="/project/" class="active">项目</a>
+      <a href="/article/" class="active">文章</a>
+      <a href="/project/">项目</a>
       <a href="https://github.com/messiahyl" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
     <button class="nav-toggle" id="navToggle" aria-label="菜单">☰</button>
@@ -105,56 +105,39 @@ footer a:hover{color:var(--cinnabar)}
 
 <div class="wrap">
   <div class="page-header">
-    <h1>项目</h1>
-    <p>开源项目与独立开发实验。每个项目都是一次技术探索，从想法到上线。</p>
+    <h1>文章</h1>
+    <p>技术探索 · AI 变现实践 · 开发者视角的真实记录</p>
   </div>
 
-  <div class="section-label">项目列表</div>
-  <main>
-    <a href="/project/agent-mesh.html" class="project-card">
-      <div class="project-meta">
-        <span class="project-date">2026-05-27</span>
-        <div class="project-tags">
-          <span>Rust</span><span>AI Agent</span><span>Git</span><span>Axum</span>
-        </div>
+  <div class="article-list">
+    <a href="/article/01_ai%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%A8%AA%E8%AF%84_deepseek_claude_doubao.html" class="article-item">
+      <div class="article-date-block">
+        <div class="article-date-day">24</div>
+        <div class="article-date-month">MAY</div>
       </div>
-      <h2 class="project-title">AgentMesh</h2>
-      <p class="project-excerpt">基于 Git 的 AI Agent 跨机器协同框架。纯 Rust 实现，频道通信、任务看板、自动同步、心跳监控、Web Dashboard，开箱即用。</p>
-      <div class="project-links">
-        <span>产品演示 →</span>
-        <span style="color:var(--line-dark)">|</span>
-        <a href="/project/agent-mesh-docs.html" style="font-family:var(--mono);font-size:12px">使用文档 →</a>
+      <div class="article-body">
+        <h2 class="article-title">2026 最强 AI 大模型横评：DeepSeek V4 vs Claude 4 vs 豆包，开发者到底该选谁？</h2>
+        <p class="article-excerpt">如果你是一名开发者或内容创作者，2026 年你一定被这些问题困扰：到底哪个模型最值得用？不同场景该选谁？性价比怎么算？</p>
+        <div class="article-meta-tags">
+          <span>AI</span><span>大模型</span><span>DeepSeek</span><span>Claude</span><span>豆包</span>
+        </div>
       </div>
     </a>
 
-    <a href="/project/index-techdoc.html" class="project-card">
-      <div class="project-meta">
-        <span class="project-date">2026-05-24</span>
-        <div class="project-tags">
-          <span>AI</span><span>文档分析</span><span>SaaS</span>
+    <a href="/article/02_ai_agent%E5%85%83%E5%B9%B4_manus_mcp_%E6%99%BA%E8%83%BD%E4%BD%93.html" class="article-item">
+      <div class="article-date-block">
+        <div class="article-date-day">24</div>
+        <div class="article-date-month">MAY</div>
+      </div>
+      <div class="article-body">
+        <h2 class="article-title">2026 AI Agent 元年：从 Manus 到 MCP 协议，智能体如何彻底重塑你的工作方式？</h2>
+        <p class="article-excerpt">先厘清一个概念：大模型 ≠ AI Agent。大模型是「大脑」，Agent 是「大脑+手脚+记忆+工具」的完整系统。</p>
+        <div class="article-meta-tags">
+          <span>AI</span><span>Agent</span><span>MCP</span><span>智能体</span>
         </div>
       </div>
-      <h2 class="project-title">TechDoc Agent</h2>
-      <p class="project-excerpt">技术文档智能分析平台。自动解析 API 文档、提取结构化数据、生成代码示例和技术摘要。</p>
-      <div class="project-links">
-        <span>查看详情 →</span>
-      </div>
     </a>
-
-    <a href="/project/moon-upgrade-report.html" class="project-card">
-      <div class="project-meta">
-        <span class="project-date">2026-05-27</span>
-        <div class="project-tags">
-          <span>AI 资源</span><span>工具链</span><span>Skill</span>
-        </div>
-      </div>
-      <h2 class="project-title">Moon 升级报告</h2>
-      <p class="project-excerpt">基于 ai-res 仓库 51 项 AI 资源的系统化分析：8 大分类统计、14 项精选工具、5 种最佳实践方案、完整开发→部署链路。</p>
-      <div class="project-links">
-        <span>查看报告 →</span>
-      </div>
-    </a>
-  </main>
+  </div>
 
   <footer>
     <p>© 2026 <a href="/">月流烟渚</a> · 用文字沉淀思考</p>
