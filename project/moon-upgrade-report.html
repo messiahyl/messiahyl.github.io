@@ -3,1397 +3,550 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Moon 升级报告 — AI 资源武装</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<title>Moon 升级报告 — AI资源实战验证</title>
 <style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #f8f6f3;
+    --card: #ffffff;
+    --primary: #2d6a4f;
+    --primary-light: #40916c;
+    --accent: #e76f51;
+    --accent-light: #f4a261;
+    --text: #264653;
+    --text-light: #6b7280;
+    --border: #e5e1dc;
+    --success: #2d6a4f;
+    --warn: #e9c46a;
+    --danger: #e76f51;
+    --info: #457b9d;
+    --tag-bg: #edf2f4;
+  }
 
-:root {
-  --bg-deep: #06080f;
-  --bg: #0a0e1a;
-  --bg-card: rgba(14, 22, 42, 0.65);
-  --bg-card-hover: rgba(20, 32, 58, 0.8);
-  --fg: #e4e8f1;
-  --fg-muted: #7a8baa;
-  --fg-dim: #4a5a78;
-  --accent-cyan: #00d4ff;
-  --accent-purple: #7c5cfc;
-  --accent-green: #00ff9d;
-  --accent-amber: #ffb020;
-  --accent-rose: #ff3b7a;
-  --border: rgba(255,255,255,0.06);
-  --glow-cyan: 0 0 30px rgba(0,212,255,0.15);
-  --glow-purple: 0 0 30px rgba(124,92,252,0.15);
-  --radius: 14px;
-  --radius-sm: 8px;
-  --mono: 'Space Mono', monospace;
-  --sans: 'Noto Sans SC', system-ui, sans-serif;
-  --display: 'Playfair Display', serif;
-}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 0;
+  }
 
-body {
-  background: var(--bg-deep);
-  color: var(--fg);
-  font-family: var(--sans);
-  font-weight: 400;
-  line-height: 1.7;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #2d6a4f 0%, #40916c 50%, #52b788 100%);
+    color: white;
+    padding: 60px 20px 50px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: 0; right: 0;
+    height: 60px;
+    background: var(--bg);
+    border-radius: 50% 50% 0 0;
+  }
+  .hero h1 { font-size: 2.2em; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .hero .subtitle { font-size: 1.1em; opacity: 0.9; font-weight: 300; }
+  .hero .meta { margin-top: 20px; font-size: 0.85em; opacity: 0.75; }
 
-/* === NOISE OVERLAY === */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 128px 128px;
-}
+  /* Container */
+  .container { max-width: 960px; margin: 0 auto; padding: 30px 20px 60px; }
 
-/* === SCROLLBAR === */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 3px; }
+  /* Stats Bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    margin: -20px 0 40px;
+    position: relative;
+    z-index: 2;
+  }
+  .stat-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+  }
+  .stat-card .num {
+    font-size: 2em;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1.2;
+  }
+  .stat-card .label {
+    font-size: 0.8em;
+    color: var(--text-light);
+    margin-top: 4px;
+  }
 
-/* === GLOBAL ANIMATIONS === */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-@keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-30px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-@keyframes gridPulse {
-  0%, 100% { opacity: 0.03; }
-  50% { opacity: 0.06; }
-}
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+  /* Section */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid var(--primary);
+    display: inline-block;
+  }
 
-.reveal {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+  /* Tool Card */
+  .tool-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s;
+  }
+  .tool-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
 
-/* === CONTAINER === */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
+  .tool-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .tool-name {
+    font-size: 1.15em;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .tool-origin {
+    font-size: 0.75em;
+    color: var(--text-light);
+    background: var(--tag-bg);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: auto;
+  }
 
-/* === HERO === */
-.hero {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: 80px 24px;
-  overflow: hidden;
-}
+  .badge {
+    display: inline-block;
+    font-size: 0.7em;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-success { background: #d8f3dc; color: var(--success); }
+  .badge-warn { background: #fef3cd; color: #92400e; }
+  .badge-danger { background: #fce4e4; color: var(--danger); }
+  .badge-info { background: #dbeafe; color: var(--info); }
 
-/* Grid background */
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
-  background-size: 60px 60px;
-  animation: gridPulse 8s ease-in-out infinite;
-}
+  .tool-desc { color: var(--text-light); font-size: 0.92em; margin-bottom: 10px; }
 
-/* Gradient orbs */
-.hero-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  pointer-events: none;
-}
-.hero-orb--cyan {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(0,212,255,0.12), transparent 70%);
-  top: -10%; right: -10%;
-  animation: float 12s ease-in-out infinite;
-}
-.hero-orb--purple {
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(124,92,252,0.1), transparent 70%);
-  bottom: -5%; left: -8%;
-  animation: float 10s ease-in-out infinite reverse;
-}
-.hero-orb--green {
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(0,255,157,0.06), transparent 70%);
-  top: 40%; left: 50%;
-  animation: float 14s ease-in-out infinite 2s;
-}
+  .test-result {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 10px;
+    font-size: 0.88em;
+    border-left: 4px solid var(--primary);
+  }
+  .test-result.fail { border-left-color: var(--danger); }
+  .test-result.warn { border-left-color: var(--warn); }
+  .test-result code {
+    background: #e8e4df;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.9em;
+  }
 
-/* Rotating ring decoration */
-.hero-ring {
-  position: absolute;
-  width: 600px; height: 600px;
-  border: 1px solid rgba(0,212,255,0.06);
-  border-radius: 50%;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  animation: rotate 120s linear infinite;
-  pointer-events: none;
-}
-.hero-ring::before {
-  content: '';
-  position: absolute;
-  width: 8px; height: 8px;
-  background: var(--accent-cyan);
-  border-radius: 50%;
-  top: -4px; left: 50%;
-  box-shadow: 0 0 12px var(--accent-cyan);
-}
+  /* Summary Table */
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+    margin-top: 12px;
+  }
+  .summary-table th {
+    background: var(--primary);
+    color: white;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 0.85em;
+    font-weight: 600;
+  }
+  .summary-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88em;
+  }
+  .summary-table tr:last-child td { border-bottom: none; }
+  .summary-table tr:hover td { background: #f0fdf4; }
 
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 18px;
-  border: 1px solid rgba(0,212,255,0.2);
-  border-radius: 100px;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--accent-cyan);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  background: rgba(0,212,255,0.04);
-  margin-bottom: 32px;
-  animation: fadeUp 1s ease-out 0.2s both;
-}
-.hero-badge .dot {
-  width: 6px; height: 6px;
-  background: var(--accent-green);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
+  /* Timeline */
+  .timeline {
+    position: relative;
+    padding-left: 28px;
+    margin-top: 16px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--primary-light);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 18px;
+    padding-left: 16px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    background: var(--primary);
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+  .timeline-item .time {
+    font-size: 0.75em;
+    color: var(--text-light);
+    font-weight: 600;
+  }
+  .timeline-item .event {
+    font-size: 0.88em;
+    color: var(--text);
+  }
 
-.hero-title {
-  font-family: var(--display);
-  font-size: clamp(48px, 8vw, 96px);
-  font-weight: 900;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  margin-bottom: 24px;
-  animation: fadeUp 1s ease-out 0.4s both;
-  position: relative;
-}
-.hero-title .gradient {
-  background: linear-gradient(135deg, #ffffff 0%, var(--accent-cyan) 50%, var(--accent-purple) 100%);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 6s ease-in-out infinite;
-}
+  /* Action Items */
+  .action-list {
+    list-style: none;
+    margin-top: 12px;
+  }
+  .action-list li {
+    padding: 10px 16px;
+    margin-bottom: 8px;
+    background: var(--card);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 0.9em;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .action-list .priority {
+    font-size: 0.7em;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .priority-high { background: #fce4e4; color: var(--danger); }
+  .priority-mid { background: #fef3cd; color: #92400e; }
+  .priority-low { background: #d8f3dc; color: var(--success); }
 
-.hero-subtitle {
-  font-size: clamp(14px, 2vw, 18px);
-  color: var(--fg-muted);
-  max-width: 600px;
-  line-height: 1.8;
-  margin-bottom: 48px;
-  animation: fadeUp 1s ease-out 0.6s both;
-}
-.hero-subtitle strong {
-  color: var(--fg);
-  font-weight: 500;
-}
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-light);
+    font-size: 0.8em;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
 
-.hero-stats {
-  display: flex;
-  gap: 40px;
-  flex-wrap: wrap;
-  justify-content: center;
-  animation: fadeUp 1s ease-out 0.8s both;
-}
-.hero-stat {
-  text-align: center;
-}
-.hero-stat__number {
-  font-family: var(--mono);
-  font-size: 36px;
-  font-weight: 700;
-  color: var(--accent-cyan);
-  line-height: 1;
-}
-.hero-stat__label {
-  font-size: 12px;
-  color: var(--fg-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin-top: 6px;
-}
+  /* Responsive */
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 1.6em; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .tool-header { flex-wrap: wrap; }
+    .tool-origin { margin-left: 0; }
+  }
 
-.hero-scroll-hint {
-  position: absolute;
-  bottom: 32px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  color: var(--fg-dim);
-  font-size: 11px;
-  font-family: var(--mono);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  animation: fadeIn 1s ease-out 1.2s both;
-}
-.hero-scroll-hint .arrow {
-  width: 1px;
-  height: 40px;
-  background: linear-gradient(to bottom, var(--fg-dim), transparent);
-  animation: pulse 2s infinite;
-}
-
-/* === SECTION === */
-.section {
-  padding: 100px 0;
-  position: relative;
-}
-.section--alt {
-  background: linear-gradient(180deg, transparent, rgba(0,212,255,0.015) 50%, transparent);
-}
-
-.section-header {
-  margin-bottom: 56px;
-  max-width: 600px;
-}
-.section-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--accent-cyan);
-  margin-bottom: 16px;
-}
-.section-tag::before {
-  content: '';
-  width: 20px;
-  height: 1px;
-  background: var(--accent-cyan);
-}
-.section-title {
-  font-size: clamp(28px, 4vw, 44px);
-  font-weight: 900;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-.section-desc {
-  font-size: 15px;
-  color: var(--fg-muted);
-  margin-top: 12px;
-  line-height: 1.8;
-}
-
-/* === STAT CARDS === */
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
-}
-.stat-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px 20px;
-  text-align: center;
-  backdrop-filter: blur(12px);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-}
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.stat-card:hover {
-  background: var(--bg-card-hover);
-  transform: translateY(-4px);
-  border-color: rgba(0,212,255,0.15);
-  box-shadow: var(--glow-cyan);
-}
-.stat-card:hover::before { opacity: 1; }
-
-.stat-card__icon {
-  font-size: 28px;
-  margin-bottom: 8px;
-  display: block;
-}
-.stat-card__count {
-  font-family: var(--mono);
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.stat-card__label {
-  font-size: 12px;
-  color: var(--fg-muted);
-  letter-spacing: 0.05em;
-}
-.stat-card--highlight .stat-card__count {
-  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* === TOOL CARDS === */
-.tools-section {
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
-}
-.tools-group-title {
-  font-family: var(--mono);
-  font-size: 13px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--fg-dim);
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 20px;
-}
-.tools-group-title .count {
-  color: var(--accent-cyan);
-}
-
-.tools-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 16px;
-}
-
-.tool-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
-  backdrop-filter: blur(12px);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.tool-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius);
-  background: linear-gradient(135deg, rgba(0,212,255,0.03), rgba(124,92,252,0.03));
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.tool-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(0,212,255,0.2);
-  box-shadow: var(--glow-cyan);
-}
-.tool-card:hover::after { opacity: 1; }
-
-.tool-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  position: relative;
-  z-index: 1;
-}
-.tool-card__name {
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--fg);
-}
-.tool-card__stars {
-  font-size: 12px;
-  color: var(--accent-amber);
-  letter-spacing: 1px;
-}
-.tool-card__desc {
-  font-size: 13px;
-  color: var(--fg-muted);
-  line-height: 1.7;
-  margin-bottom: 14px;
-  position: relative;
-  z-index: 1;
-}
-.tool-card__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  position: relative;
-  z-index: 1;
-}
-.tag {
-  display: inline-flex;
-  padding: 3px 10px;
-  font-size: 11px;
-  font-family: var(--mono);
-  border-radius: 100px;
-  letter-spacing: 0.02em;
-}
-.tag--cyan {
-  background: rgba(0,212,255,0.08);
-  color: var(--accent-cyan);
-  border: 1px solid rgba(0,212,255,0.15);
-}
-.tag--purple {
-  background: rgba(124,92,252,0.08);
-  color: var(--accent-purple);
-  border: 1px solid rgba(124,92,252,0.15);
-}
-.tag--green {
-  background: rgba(0,255,157,0.06);
-  color: var(--accent-green);
-  border: 1px solid rgba(0,255,157,0.12);
-}
-.tag--amber {
-  background: rgba(255,176,32,0.06);
-  color: var(--accent-amber);
-  border: 1px solid rgba(255,176,32,0.12);
-}
-
-.tool-card--armed {
-  border-color: rgba(0,255,157,0.15);
-}
-.tool-card--armed::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--accent-green), transparent);
-}
-.tool-card--recommend {
-  border-color: rgba(124,92,252,0.1);
-}
-.tool-card--recommend::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--accent-purple), transparent);
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 100px;
-  position: relative;
-  z-index: 1;
-}
-.status-badge--armed {
-  background: rgba(0,255,157,0.08);
-  color: var(--accent-green);
-  border: 1px solid rgba(0,255,157,0.2);
-}
-.status-badge--recommend {
-  background: rgba(124,92,252,0.08);
-  color: var(--accent-purple);
-  border: 1px solid rgba(124,92,252,0.2);
-}
-.status-badge .dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-.status-badge--armed .dot { background: var(--accent-green); }
-.status-badge--recommend .dot { background: var(--accent-purple); }
-
-/* === PRACTICE CARDS === */
-.practices-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 20px;
-}
-.practice-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  backdrop-filter: blur(12px);
-  transition: all 0.3s ease;
-}
-.practice-card:hover {
-  border-color: rgba(0,212,255,0.15);
-}
-.practice-card__header {
-  padding: 24px 24px 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-.practice-card__icon {
-  font-size: 32px;
-  flex-shrink: 0;
-}
-.practice-card__title {
-  font-size: 17px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-.practice-card__subtitle {
-  font-size: 12px;
-  color: var(--fg-dim);
-  font-family: var(--mono);
-}
-.practice-card__body {
-  padding: 16px 24px;
-}
-.practice-card__stack {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.stack-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--fg);
-  transition: all 0.2s;
-}
-.stack-item:hover {
-  background: rgba(0,212,255,0.06);
-  border-color: rgba(0,212,255,0.2);
-}
-.stack-item .plus {
-  color: var(--fg-dim);
-  font-size: 10px;
-}
-.practice-card__desc {
-  font-size: 13px;
-  color: var(--fg-muted);
-  line-height: 1.7;
-}
-
-/* === PIPELINE FLOW === */
-.pipeline {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  padding: 40px 0;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.pipeline-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-  text-align: center;
-  min-width: 120px;
-}
-.pipeline-step__icon {
-  width: 56px; height: 56px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  border: 1px solid var(--border);
-  transition: all 0.3s;
-}
-.pipeline-step:hover .pipeline-step__icon {
-  transform: scale(1.1);
-  box-shadow: var(--glow-cyan);
-}
-.pipeline-step__label {
-  font-size: 11px;
-  font-family: var(--mono);
-  color: var(--fg-muted);
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-}
-.pipeline-step__tool {
-  font-size: 10px;
-  color: var(--accent-cyan);
-  font-family: var(--mono);
-}
-.pipeline-arrow {
-  flex-shrink: 0;
-  width: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--fg-dim);
-  font-size: 18px;
-  padding-bottom: 30px;
-}
-.pipeline-arrow svg {
-  width: 24px; height: 12px;
-  stroke: var(--fg-dim);
-  fill: none;
-  stroke-width: 1.5;
-}
-
-/* === CHECKLIST === */
-.checklist {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 12px;
-}
-.checklist-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  transition: all 0.3s;
-  cursor: default;
-}
-.checklist-item:hover {
-  border-color: rgba(0,212,255,0.15);
-  background: var(--bg-card-hover);
-}
-.checklist-item__checkbox {
-  width: 20px; height: 20px;
-  border-radius: 6px;
-  border: 1.5px solid var(--fg-dim);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.3s;
-}
-.checklist-item:hover .checklist-item__checkbox {
-  border-color: var(--accent-cyan);
-}
-.checklist-item__text {
-  font-size: 14px;
-  color: var(--fg-muted);
-}
-.checklist-item:hover .checklist-item__text {
-  color: var(--fg);
-}
-
-/* === FOOTER === */
-.footer {
-  padding: 48px 0;
-  text-align: center;
-  border-top: 1px solid var(--border);
-}
-.footer__text {
-  font-size: 12px;
-  color: var(--fg-dim);
-  font-family: var(--mono);
-  letter-spacing: 0.05em;
-}
-.footer__text a {
-  color: var(--accent-cyan);
-  text-decoration: none;
-}
-.footer__text a:hover {
-  text-decoration: underline;
-}
-
-/* === DIVIDER === */
-.divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border), transparent);
-  margin: 0;
-  border: none;
-}
-
-/* === RESPONSIVE === */
-@media (max-width: 768px) {
-  .hero-stats { gap: 24px; }
-  .hero-stat__number { font-size: 28px; }
-  .tools-grid { grid-template-columns: 1fr; }
-  .practices-grid { grid-template-columns: 1fr; }
-  .stat-grid { grid-template-columns: repeat(3, 1fr); }
-  .checklist { grid-template-columns: 1fr; }
-  .pipeline { justify-content: flex-start; padding: 40px 16px; }
-  .section { padding: 60px 0; }
-}
-
-/* === COLLAPSIBLE === */
-.collapsible-trigger {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: none;
-  border: none;
-  color: var(--accent-cyan);
-  font-family: var(--mono);
-  font-size: 12px;
-  cursor: pointer;
-  padding: 8px 0;
-  letter-spacing: 0.05em;
-  transition: opacity 0.2s;
-}
-.collapsible-trigger:hover { opacity: 0.7; }
-.collapsible-trigger svg {
-  transition: transform 0.3s;
-}
-.collapsible-trigger.open svg {
-  transform: rotate(180deg);
-}
-.collapsible-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.collapsible-content.open {
-  max-height: 2000px;
-}
+  /* Collapsible */
+  details {
+    margin-top: 10px;
+  }
+  details summary {
+    cursor: pointer;
+    color: var(--primary);
+    font-size: 0.85em;
+    font-weight: 600;
+    padding: 4px 0;
+  }
+  details summary:hover { color: var(--primary-light); }
 </style>
 </head>
 <body>
 
-<!-- ===== HERO ===== -->
-<section class="hero">
-  <div class="hero-orb hero-orb--cyan"></div>
-  <div class="hero-orb hero-orb--purple"></div>
-  <div class="hero-orb hero-orb--green"></div>
-  <div class="hero-ring"></div>
+<div class="hero">
+  <h1>🛡️ Moon 升级报告</h1>
+  <div class="subtitle">ai-res 仓库资源实战验证 — 从 51 项资源到 8 项可用 Skill</div>
+  <div class="meta">报告生成时间：2025-05-27 · 分析对象：gitee.com/messiahyl/ai-res · 实验环境：Moon on Clacky</div>
+</div>
 
-  <div class="hero-badge">
-    <span class="dot"></span>
-    <span>AI Resource Analysis · 2026-05-27</span>
-  </div>
+<div class="container">
 
-  <h1 class="hero-title">
-    <span class="gradient">Moon 升级报告</span>
-  </h1>
-
-  <p class="hero-subtitle">
-    基于 <strong>ai-res</strong> 仓库 <strong>51 项</strong> AI 资源深度分析，<br>
-    覆盖 <strong>8 大分类 · 46 项活跃资源 · 7 份最佳实践</strong>，<br>
-    筛选武器库，输出最佳实践方案。
-  </p>
-
-  <div class="hero-stats">
-    <div class="hero-stat">
-      <div class="hero-stat__number">51</div>
-      <div class="hero-stat__label">Total Resources</div>
+  <!-- 统计概览 -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="num">51</div>
+      <div class="label">扫描资源总数</div>
     </div>
-    <div class="hero-stat">
-      <div class="hero-stat__number">8</div>
-      <div class="hero-stat__label">Categories</div>
+    <div class="stat-card">
+      <div class="num">8</div>
+      <div class="label">成功安装 Skill</div>
     </div>
-    <div class="hero-stat">
-      <div class="hero-stat__number">46</div>
-      <div class="hero-stat__label">Active</div>
+    <div class="stat-card">
+      <div class="num">1</div>
+      <div class="label">CLI 工具就绪</div>
     </div>
-    <div class="hero-stat">
-      <div class="hero-stat__number">7</div>
-      <div class="hero-stat__label">Best Practices</div>
+    <div class="stat-card">
+      <div class="num">42</div>
+      <div class="label">不适用/已排除</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">78</div>
+      <div class="label">Moon 总 Skill 数</div>
     </div>
   </div>
 
-  <div class="hero-scroll-hint">
-    <span>Scroll</span>
-    <div class="arrow"></div>
-  </div>
-</section>
-
-<!-- ===== STATS ===== -->
-<section class="section">
-  <div class="container">
-    <div class="section-header reveal">
-      <div class="section-tag">Overview</div>
-      <h2 class="section-title">资源统计概览</h2>
-      <p class="section-desc">ai-res 仓库按分类的资源分布。Agent 工具是最大类别（22 项），反映 AI Agent 生态的高速发展。</p>
-    </div>
-
-    <div class="stat-grid reveal">
-      <div class="stat-card stat-card--highlight">
-        <span class="stat-card__icon">🧩</span>
-        <div class="stat-card__count">10</div>
-        <div class="stat-card__label">Skills</div>
+  <!-- 实验时间线 -->
+  <div class="section">
+    <div class="section-title">实验时间线</div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="time">Phase 1 — 资源盘点</div>
+        <div class="event">扫描 ai-res 仓库全部 51 项资源，按三层筛选标准分类：T1 直接装 / T2 需适配 / T3 需配置 / T4 不适用</div>
       </div>
-      <div class="stat-card">
-        <span class="stat-card__icon">🔌</span>
-        <div class="stat-card__count">2</div>
-        <div class="stat-card__label">MCP</div>
+      <div class="timeline-item">
+        <div class="time">Phase 2 — 环境准备</div>
+        <div class="event">安装 bun 1.3.14 运行时（通过 ghfast.top 国内镜像），验证 Node.js v24.14.1 兼容性</div>
       </div>
-      <div class="stat-card">
-        <span class="stat-card__icon">🧩</span>
-        <div class="stat-card__count">1</div>
-        <div class="stat-card__label">Plugins</div>
+      <div class="timeline-item">
+        <div class="time">Phase 3 — 批量克隆</div>
+        <div class="event">克隆 cangjie-skill、webnovel-writer、get-shit-done、superpowers、gbrain 共 5 个仓库</div>
       </div>
-      <div class="stat-card">
-        <span class="stat-card__icon">⌨️</span>
-        <div class="stat-card__count">5</div>
-        <div class="stat-card__label">CLI Tools</div>
+      <div class="timeline-item">
+        <div class="time">Phase 4 — 安装验证</div>
+        <div class="event">逐个测试安装路径，验证 SKILL.md 格式合规性，确认 Clacky 可加载</div>
       </div>
-      <div class="stat-card">
-        <span class="stat-card__icon">📦</span>
-        <div class="stat-card__count">11</div>
-        <div class="stat-card__label">Open Source</div>
-      </div>
-      <div class="stat-card stat-card--highlight">
-        <span class="stat-card__icon">🤖</span>
-        <div class="stat-card__count">22</div>
-        <div class="stat-card__label">Agent Tools</div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-card__icon">📊</span>
-        <div class="stat-card__count">0</div>
-        <div class="stat-card__label">Reports</div>
+      <div class="timeline-item">
+        <div class="time">Phase 5 — 功能实测</div>
+        <div class="event">对每个工具执行真实命令测试，记录成功/失败原因</div>
       </div>
     </div>
   </div>
-</section>
 
-<div class="divider"></div>
+  <!-- 成功安装的工具 -->
+  <div class="section">
+    <div class="section-title">✅ 成功安装</div>
 
-<!-- ===== ARMORY ===== -->
-<section class="section section--alt">
-  <div class="container">
-    <div class="section-header reveal">
-      <div class="section-tag">Armory</div>
-      <h2 class="section-title">精选武器库</h2>
-      <p class="section-desc">从 51 项资源中筛选出 Moon 可直接武装的高价值工具，分为「已武装」和「推荐武装」两级。</p>
+    <div class="tool-card">
+      <div class="tool-header">
+        <span class="tool-name">cangjie-skill (book2skill)</span>
+        <span class="badge badge-success">已安装</span>
+        <span class="tool-origin">ai-res/skills/cangjie-skill</span>
+      </div>
+      <div class="tool-desc">读书方法论蒸馏工具。输入一本书的核心内容，自动提取为可执行的原子化 Skill。支持「拆书」「蒸馏」等触发词。</div>
+      <div class="test-result">
+        <strong>测试结果：</strong>SKILL.md 格式验证通过（name + description + allowed-tools 完整）。安装路径 <code>~/.clacky/skills/cangjie-skill/</code>。
+        Clacky 可正常加载并识别触发词「拆书」「蒸馏一本书」。
+      </div>
+      <details>
+        <summary>SKILL.md 摘要</summary>
+        <div class="test-result">
+          name: book2skill<br>
+          description: 将书籍方法论蒸馏为可执行技能<br>
+          allowed-tools: Read, Write, Edit, Grep, Bash, AskUserQuestion<br>
+          适用场景：拆解商业/技术书籍形成可复用的思维框架
+        </div>
+      </details>
     </div>
 
-    <div class="tools-section">
-      <!-- ARMED -->
-      <div class="reveal">
-        <div class="tools-group-title">
-          <span style="color:var(--accent-green)">●</span> 已武装 — Clacky 已集成 <span class="count">(7)</span>
-        </div>
-        <div class="tools-grid">
-
-          <div class="tool-card tool-card--armed">
-            <div class="tool-card__header">
-              <span class="tool-card__name">huashu-design</span>
-              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
-            </div>
-            <div class="tool-card__stars">★★★★★</div>
-            <div class="tool-card__desc">HTML 原生一体化设计 Skill — 交互原型、幻灯片、动画、信息图、品牌设计、5 维评审，7 大能力矩阵。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">设计</span>
-              <span class="tag tag--purple">HTML 原型</span>
-              <span class="tag tag--green">品牌资产</span>
-            </div>
-          </div>
-
-          <div class="tool-card tool-card--armed">
-            <div class="tool-card__header">
-              <span class="tool-card__name">nuwa-skill</span>
-              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
-            </div>
-            <div class="tool-card__stars">★★★★★</div>
-            <div class="tool-card__desc">思维蒸馏 Skill — 输入人名/主题，自动深度调研 → 思维框架提炼 → 生成可运行的人物 Skill。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">思维蒸馏</span>
-              <span class="tag tag--purple">认知框架</span>
-              <span class="tag tag--green">心智模型</span>
-            </div>
-          </div>
-
-          <div class="tool-card tool-card--armed">
-            <div class="tool-card__header">
-              <span class="tool-card__name">gstack</span>
-              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
-            </div>
-            <div class="tool-card__stars">★★★★★</div>
-            <div class="tool-card__desc">Garry Tan 完整开发工作流 — 23 个专业化 Skill，把 AI 助手变成虚拟工程团队。96k star。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">Sprint 流程</span>
-              <span class="tag tag--purple">多角色协作</span>
-              <span class="tag tag--amber">96k ★</span>
-            </div>
-          </div>
-
-          <div class="tool-card tool-card--armed">
-            <div class="tool-card__header">
-              <span class="tool-card__name">superpowers</span>
-              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
-            </div>
-            <div class="tool-card__stars">★★★★★</div>
-            <div class="tool-card__desc">自动触发的开发方法论 — Agent 启动后自动进入 brainstorming → spec → TDD → review 完整流程。176k star。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">TDD</span>
-              <span class="tag tag--purple">自动触发</span>
-              <span class="tag tag--amber">176k ★</span>
-            </div>
-          </div>
-
-          <div class="tool-card tool-card--armed">
-            <div class="tool-card__header">
-              <span class="tool-card__name">get-shit-done</span>
-              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
-            </div>
-            <div class="tool-card__stars">★★★★★</div>
-            <div class="tool-card__desc">上下文工程 + Spec 驱动 — 解决 Agent 上下文腐烂问题，XML prompt 格式化 + subagent 编排。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">上下文工程</span>
-              <span class="tag tag--purple">Spec 驱动</span>
-              <span class="tag tag--green">防 Context Rot</span>
-            </div>
-          </div>
-
-          <div class="tool-card tool-card--armed">
-            <div class="tool-card__header">
-              <span class="tool-card__name">Playwright MCP</span>
-              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
-            </div>
-            <div class="tool-card__stars">★★★★★</div>
-            <div class="tool-card__desc">Microsoft Playwright MCP — 成熟浏览器自动化框架，支持录制回放、E2E 测试。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">浏览器自动化</span>
-              <span class="tag tag--purple">MCP</span>
-              <span class="tag tag--green">E2E 测试</span>
-            </div>
-          </div>
-
-          <div class="tool-card tool-card--armed">
-            <div class="tool-card__header">
-              <span class="tool-card__name">Chrome DevTools MCP</span>
-              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
-            </div>
-            <div class="tool-card__stars">★★★★★</div>
-            <div class="tool-card__desc">Chrome DevTools Protocol 直连 — 实时调试线上页面，查看 Console、Network、DOM。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">CDP</span>
-              <span class="tag tag--purple">实时调试</span>
-              <span class="tag tag--green">Chrome</span>
-            </div>
-          </div>
-
-        </div>
+    <div class="tool-card">
+      <div class="tool-header">
+        <span class="tool-name">webnovel-writer（7 个子 Skill）</span>
+        <span class="badge badge-success">已安装 ×7</span>
+        <span class="tool-origin">ai-res/skills/webnovel-writer</span>
       </div>
-
-      <!-- RECOMMEND -->
-      <div class="reveal">
-        <div class="tools-group-title">
-          <span style="color:var(--accent-purple)">●</span> 推荐武装 — 高价值待集成 <span class="count">(7)</span>
-        </div>
-        <div class="tools-grid">
-
-          <div class="tool-card tool-card--recommend">
-            <div class="tool-card__header">
-              <span class="tool-card__name">gbrain</span>
-              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
-            </div>
-            <div class="tool-card__stars">★★★★★</div>
-            <div class="tool-card__desc">知识图谱记忆系统 — PGLite 存储，向量搜索，MCP 协议接入。项目知识的长期记忆大脑。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">知识图谱</span>
-              <span class="tag tag--purple">向量搜索</span>
-              <span class="tag tag--green">MCP</span>
-            </div>
-          </div>
-
-          <div class="tool-card tool-card--recommend">
-            <div class="tool-card__header">
-              <span class="tool-card__name">Beads</span>
-              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
-            </div>
-            <div class="tool-card__stars">★★★★★</div>
-            <div class="tool-card__desc">Agent 记忆 + 任务管理 + 依赖图 — 基于 Dolt 版本数据库，追踪 Agent 决策链路。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">Agent 记忆</span>
-              <span class="tag tag--purple">Dolt</span>
-              <span class="tag tag--green">依赖图</span>
-            </div>
-          </div>
-
-          <div class="tool-card tool-card--recommend">
-            <div class="tool-card__header">
-              <span class="tool-card__name">skillshare</span>
-              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
-            </div>
-            <div class="tool-card__stars">★★★★☆</div>
-            <div class="tool-card__desc">多平台 Skill 统一同步 — Go 单二进制，60+ 平台支持，内置安全审计和 Web Dashboard。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">Skill 同步</span>
-              <span class="tag tag--purple">60+ 平台</span>
-              <span class="tag tag--amber">Go</span>
-            </div>
-          </div>
-
-          <div class="tool-card tool-card--recommend">
-            <div class="tool-card__header">
-              <span class="tool-card__name">AgentSys</span>
-              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
-            </div>
-            <div class="tool-card__stars">★★★★★</div>
-            <div class="tool-card__desc">跨平台 Agent 编排 — 5 平台通吃 + agnix 配置检查 + 成本优化 + 代码审查。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">跨平台</span>
-              <span class="tag tag--purple">Agent 编排</span>
-              <span class="tag tag--green">成本优化</span>
-            </div>
-          </div>
-
-          <div class="tool-card tool-card--recommend">
-            <div class="tool-card__header">
-              <span class="tool-card__name">Evot</span>
-              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
-            </div>
-            <div class="tool-card__stars">★★★★★</div>
-            <div class="tool-card__desc">Rust 自进化 Agent 引擎 — 零浪费上下文，token 节省 50%。/goal 自主规划，/harden 压力测试。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">Rust</span>
-              <span class="tag tag--purple">Token 优化</span>
-              <span class="tag tag--green">自进化</span>
-            </div>
-          </div>
-
-          <div class="tool-card tool-card--recommend">
-            <div class="tool-card__header">
-              <span class="tool-card__name">squad</span>
-              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
-            </div>
-            <div class="tool-card__stars">★★★★☆</div>
-            <div class="tool-card__desc">多 Agent 终端协作 — SQLite 消息总线，manager/worker/inspector 角色体系，tmux 集成。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">多 Agent</span>
-              <span class="tag tag--purple">SQLite</span>
-              <span class="tag tag--green">终端协作</span>
-            </div>
-          </div>
-
-          <div class="tool-card tool-card--recommend">
-            <div class="tool-card__header">
-              <span class="tool-card__name">Rowboat</span>
-              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
-            </div>
-            <div class="tool-card__stars">★★★★★</div>
-            <div class="tool-card__desc">AI 同事 + 知识图谱 — Electron 桌面应用，持久化记忆，上下文感知的 Agent 协作。</div>
-            <div class="tool-card__tags">
-              <span class="tag tag--cyan">知识图谱</span>
-              <span class="tag tag--purple">记忆系统</span>
-              <span class="tag tag--green">Electron</span>
-            </div>
-          </div>
-
-        </div>
+      <div class="tool-desc">基于 AI 的长篇网文创作系统。自动管理角色设定、剧情伏笔、世界观规则，支持几百章连载不矛盾。</div>
+      <div class="test-result">
+        <strong>测试结果：</strong>7 个子 Skill 全部安装成功，SKILL.md 格式合规。
+        <table class="summary-table" style="margin-top:8px">
+          <tr><th>子 Skill</th><th>功能</th><th>状态</th></tr>
+          <tr><td>webnovel-init</td><td>深度初始化网文项目，交互收集创作信息</td><td>✅</td></tr>
+          <tr><td>webnovel-plan</td><td>基于总纲生成卷纲、时间线和章纲</td><td>✅</td></tr>
+          <tr><td>webnovel-write</td><td>完整写作流程：上下文→起草→审查→润色→提交</td><td>✅</td></tr>
+          <tr><td>webnovel-review</td><td>审查 Agent 评估章节质量并生成报告</td><td>✅</td></tr>
+          <tr><td>webnovel-query</td><td>查询设定、角色、力量体系、伏笔等信息</td><td>✅</td></tr>
+          <tr><td>webnovel-learn</td><td>从会话提取成功模式写入项目记忆</td><td>✅</td></tr>
+          <tr><td>webnovel-dashboard</td><td>只读管理面板，查看项目状态与图谱</td><td>✅</td></tr>
+        </table>
       </div>
     </div>
   </div>
-</section>
 
-<div class="divider"></div>
+  <!-- 部分可用 -->
+  <div class="section">
+    <div class="section-title">⚠️ 部分可用</div>
 
-<!-- ===== BEST PRACTICES ===== -->
-<section class="section">
-  <div class="container">
-    <div class="section-header reveal">
-      <div class="section-tag">Best Practices</div>
-      <h2 class="section-title">最佳实践方案</h2>
-      <p class="section-desc">基于跨工具组合分析，为 5 种核心场景设计的工具搭配策略。</p>
-    </div>
-
-    <div class="practices-grid">
-
-      <div class="practice-card reveal">
-        <div class="practice-card__header">
-          <span class="practice-card__icon">🏗️</span>
-          <div>
-            <div class="practice-card__title">独立开发者全栈</div>
-            <div class="practice-card__subtitle">dev → deploy pipeline</div>
-          </div>
-        </div>
-        <div class="practice-card__body">
-          <div class="practice-card__stack">
-            <span class="stack-item">gstack</span>
-            <span class="stack-item">gbrain</span>
-            <span class="stack-item">pinme</span>
-          </div>
-          <div class="practice-card__desc">
-            gstack 定义开发流程（23 个 Skill 覆盖规划→编码→审查→部署），gbrain 提供项目知识记忆，pinme 一键部署到 IPFS。从想法到上线最短路径。
-          </div>
-        </div>
+    <div class="tool-card">
+      <div class="tool-header">
+        <span class="tool-name">gbrain</span>
+        <span class="badge badge-warn">CLI 就绪 / 核心功能受阻</span>
+        <span class="tool-origin">ai-res/tools/gbrain</span>
       </div>
-
-      <div class="practice-card reveal">
-        <div class="practice-card__header">
-          <span class="practice-card__icon">🤖</span>
-          <div>
-            <div class="practice-card__title">多 Agent 协作</div>
-            <div class="practice-card__subtitle">multi-agent orchestration</div>
-          </div>
-        </div>
-        <div class="practice-card__body">
-          <div class="practice-card__stack">
-            <span class="stack-item">Evot</span>
-            <span class="stack-item">squad</span>
-            <span class="stack-item">oh-my-claudecode</span>
-          </div>
-          <div class="practice-card__desc">
-            Evot 作为 Worker 执行引擎（token 节省 50%），squad 做 Agent 间消息协调，OMC 负责任务分解和智能路由。三层架构覆盖复杂功能开发。
-          </div>
-        </div>
+      <div class="tool-desc">个人知识大脑系统。基于 PGLite 嵌入式数据库，支持 Markdown 知识页面的自动分块、嵌入向量化、语义搜索和知识图谱。</div>
+      <div class="test-result warn">
+        <strong>CLI 安装：</strong>✅ gbrain 0.41.20.0 安装成功（bun + npm link）<br>
+        <strong>数据库初始化：</strong>✅ PGLite 就绪于 <code>~/.gbrain/brain.pglite</code><br>
+        <strong>47 个内置 Skill：</strong>✅ 全部通过健康检查<br>
+        <strong>知识写入（核心功能）：</strong>❌ <code>gbrain put</code> 失败<br>
+        <strong>阻塞原因：</strong>嵌入向量生成依赖 API 调用，智谱 API 余额不足（<code>余额不足或无可用资源包,请充值</code>），本地 Ollama 因配置不足无法使用
       </div>
-
-      <div class="practice-card reveal">
-        <div class="practice-card__header">
-          <span class="practice-card__icon">⚡</span>
-          <div>
-            <div class="practice-card__title">快速原型</div>
-            <div class="practice-card__subtitle">rapid prototyping</div>
-          </div>
+      <details>
+        <summary>gbrain doctor 诊断详情</summary>
+        <div class="test-result warn">
+          <table class="summary-table" style="margin-top:8px">
+            <tr><th>检查项</th><th>状态</th></tr>
+            <tr><td>resolver_health</td><td>✅ 47 skills, all reachable</td></tr>
+            <tr><td>skill_conformance</td><td>✅ 47/47 pass</td></tr>
+            <tr><td>connection</td><td>✅ Connected, 0 pages</td></tr>
+            <tr><td>schema_version</td><td>✅ Version 103 (latest)</td></tr>
+            <tr><td>brain_score</td><td>✅ 100/100</td></tr>
+            <tr><td>embedding_provider</td><td>⚠️ 余额不足</td></tr>
+            <tr><td>embeddings</td><td>⚠️ No embeddings yet</td></tr>
+            <tr><td>home_dir_in_worktree</td><td>⚠️ 配置在 git 工作树内</td></tr>
+          </table>
         </div>
-        <div class="practice-card__body">
-          <div class="practice-card__stack">
-            <span class="stack-item">GSD</span>
-            <span class="stack-item">huashu-design</span>
-            <span class="stack-item">pinme</span>
-          </div>
-          <div class="practice-card__desc">
-            GSD 的 Spec 驱动快速定义需求，huashu-design 生成高保真交互原型，pinme 秒级部署。半天内从想法到可演示产品。
-          </div>
-        </div>
-      </div>
-
-      <div class="practice-card reveal">
-        <div class="practice-card__header">
-          <span class="practice-card__icon">🌐</span>
-          <div>
-            <div class="practice-card__title">浏览器自动化</div>
-            <div class="practice-card__subtitle">browser automation</div>
-          </div>
-        </div>
-        <div class="practice-card__body">
-          <div class="practice-card__stack">
-            <span class="stack-item">Playwright MCP</span>
-            <span class="stack-item">Chrome DevTools MCP</span>
-            <span class="stack-item">gstack /browse</span>
-          </div>
-          <div class="practice-card__desc">
-            开发阶段用 /browse 做 QA，测试阶段用 Playwright 做回归，线上用 Chrome DevTools 实时调试。三阶段浏览器工具覆盖。
-          </div>
-        </div>
-      </div>
-
-      <div class="practice-card reveal">
-        <div class="practice-card__header">
-          <span class="practice-card__icon">🧠</span>
-          <div>
-            <div class="practice-card__title">知识管理</div>
-            <div class="practice-card__subtitle">knowledge management</div>
-          </div>
-        </div>
-        <div class="practice-card__body">
-          <div class="practice-card__stack">
-            <span class="stack-item">gbrain</span>
-            <span class="stack-item">Claude-Mem</span>
-            <span class="stack-item">skillshare</span>
-          </div>
-          <div class="practice-card__desc">
-            gbrain 管理项目知识和决策记录，Claude-Mem 记录对话经验和踩坑，skillshare 统一管理安装的 Skill 并跨平台同步。三层知识体系。
-          </div>
-        </div>
-      </div>
-
+      </details>
     </div>
   </div>
-</section>
 
-<div class="divider"></div>
+  <!-- 不适用 -->
+  <div class="section">
+    <div class="section-title">❌ 不适用 / 排除</div>
 
-<!-- ===== PIPELINE ===== -->
-<section class="section section--alt">
-  <div class="container">
-    <div class="section-header reveal">
-      <div class="section-tag">Pipeline</div>
-      <h2 class="section-title">开发→部署 完整链路</h2>
-      <p class="section-desc">基于 gstack Sprint 流程的完整工作链路，每步输出是下一步输入。</p>
+    <div class="tool-card">
+      <div class="tool-header">
+        <span class="tool-name">get-shit-done (GSD)</span>
+        <span class="badge badge-danger">不兼容</span>
+        <span class="tool-origin">ai-res/agents/get-shit-done</span>
+      </div>
+      <div class="tool-desc">项目管理 CLI 工具 + SDK。提供 milestone、phase、capture 等工作流命令。</div>
+      <div class="test-result fail">
+        <strong>排除原因：</strong>GSD 是一个独立的 Node.js CLI 工具（需要 <code>npm install -g</code>），不是 SKILL.md 格式的 Clacky Skill。
+        仓库已迁移到 <code>open-gsd/get-shit-done-redux</code>，且要求 Node.js ≥22。
+        其 AGENTS.md 是开发者贡献指南，不包含 Clacky 兼容的 skill 定义。
+      </div>
     </div>
 
-    <div class="pipeline reveal">
-      <div class="pipeline-step">
-        <div class="pipeline-step__icon" style="background:rgba(0,212,255,0.06);">💡</div>
-        <span class="pipeline-step__label">/office-hours</span>
-        <span class="pipeline-step__tool">gstack</span>
+    <div class="tool-card">
+      <div class="tool-header">
+        <span class="tool-name">superpowers</span>
+        <span class="badge badge-danger">不是 Skill</span>
+        <span class="tool-origin">ai-res/agents/superpowers</span>
       </div>
-      <div class="pipeline-arrow"><svg viewBox="0 0 24 12"><path d="M0 6 L20 6 M16 2 L20 6 L16 10"/></svg></div>
-      <div class="pipeline-step">
-        <div class="pipeline-step__icon" style="background:rgba(124,92,252,0.06);">📋</div>
-        <span class="pipeline-step__label">/plan-review</span>
-        <span class="pipeline-step__tool">CEO + Eng</span>
+      <div class="tool-desc">Claude Code 贡献者指南和最佳实践文档集合。</div>
+      <div class="test-result fail">
+        <strong>排除原因：</strong>仓库内容为 CLAUDE.md（贡献规范）和 AGENTS.md（开发指南），是给 Claude Code 开发者的参考文档，不是可安装的 Skill。
       </div>
-      <div class="pipeline-arrow"><svg viewBox="0 0 24 12"><path d="M0 6 L20 6 M16 2 L20 6 L16 10"/></svg></div>
-      <div class="pipeline-step">
-        <div class="pipeline-step__icon" style="background:rgba(0,255,157,0.06);">⌨️</div>
-        <span class="pipeline-step__label">编码 + TDD</span>
-        <span class="pipeline-step__tool">superpowers</span>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-header">
+        <span class="tool-name">其余 42 项资源</span>
+        <span class="badge badge-info">已排除</span>
       </div>
-      <div class="pipeline-arrow"><svg viewBox="0 0 24 12"><path d="M0 6 L20 6 M16 2 L20 6 L16 10"/></svg></div>
-      <div class="pipeline-step">
-        <div class="pipeline-step__icon" style="background:rgba(255,176,32,0.06);">🔍</div>
-        <span class="pipeline-step__label">/review</span>
-        <span class="pipeline-step__tool">Code Review</span>
-      </div>
-      <div class="pipeline-arrow"><svg viewBox="0 0 24 12"><path d="M0 6 L20 6 M16 2 L20 6 L16 10"/></svg></div>
-      <div class="pipeline-step">
-        <div class="pipeline-step__icon" style="background:rgba(255,59,122,0.06);">🧪</div>
-        <span class="pipeline-step__label">/qa</span>
-        <span class="pipeline-step__tool">Browse + QA</span>
-      </div>
-      <div class="pipeline-arrow"><svg viewBox="0 0 24 12"><path d="M0 6 L20 6 M16 2 L20 6 L16 10"/></svg></div>
-      <div class="pipeline-step">
-        <div class="pipeline-step__icon" style="background:rgba(0,212,255,0.06);">🚀</div>
-        <span class="pipeline-step__label">/ship</span>
-        <span class="pipeline-step__tool">Deploy</span>
-      </div>
-      <div class="pipeline-arrow"><svg viewBox="0 0 24 12"><path d="M0 6 L20 6 M16 2 L20 6 L16 10"/></svg></div>
-      <div class="pipeline-step">
-        <div class="pipeline-step__icon" style="background:rgba(0,255,157,0.06);">🔄</div>
-        <span class="pipeline-step__label">/retro</span>
-        <span class="pipeline-step__tool">复盘</span>
+      <div class="test-result">
+        <table class="summary-table" style="margin-top:8px">
+          <tr><th>类型</th><th>数量</th><th>排除原因</th></tr>
+          <tr><td>Claude Code 专属 Agent</td><td>22</td><td>AGENTS.md 格式，Clacky 不兼容</td></tr>
+          <tr><td>MCP 服务 (playwright/chrome)</td><td>2</td><td>Moon 已有内置 browser 能力</td></tr>
+          <tr><td>需 Go 环境</td><td>1</td><td>本机无 Go，无法编译</td></tr>
+          <tr><td>文档/教程/列表</td><td>12</td><td>参考内容，非可安装工具</td></tr>
+          <tr><td>重复/已安装</td><td>5</td><td>Moon 已有同类功能</td></tr>
+        </table>
       </div>
     </div>
   </div>
-</section>
 
-<div class="divider"></div>
-
-<!-- ===== NEXT STEPS ===== -->
-<section class="section">
-  <div class="container">
-    <div class="section-header reveal">
-      <div class="section-tag">Next Steps</div>
-      <h2 class="section-title">升级路线图</h2>
-      <p class="section-desc">基于本次分析，规划的下一步工具安装和集成计划。</p>
-    </div>
-
-    <div class="checklist reveal">
-      <div class="checklist-item">
-        <div class="checklist-item__checkbox"></div>
-        <span class="checklist-item__text">安装 gbrain 建立知识记忆系统</span>
-      </div>
-      <div class="checklist-item">
-        <div class="checklist-item__checkbox"></div>
-        <span class="checklist-item__text">安装 skillshare 统一管理多平台 Skills</span>
-      </div>
-      <div class="checklist-item">
-        <div class="checklist-item__checkbox"></div>
-        <span class="checklist-item__text">安装 Evot 提升长任务执行效率</span>
-      </div>
-      <div class="checklist-item">
-        <div class="checklist-item__checkbox"></div>
-        <span class="checklist-item__text">配置 squad 多 Agent 终端协作环境</span>
-      </div>
-      <div class="checklist-item">
-        <div class="checklist-item__checkbox"></div>
-        <span class="checklist-item__text">持续从 ai-res 仓库发现并集成新资源</span>
-      </div>
-      <div class="checklist-item">
-        <div class="checklist-item__checkbox"></div>
-        <span class="checklist-item__text">建立定期扫描机制，自动更新 GitHub Pages 站点</span>
-      </div>
+  <!-- 环境快照 -->
+  <div class="section">
+    <div class="section-title">🔬 实验环境快照</div>
+    <div class="tool-card">
+      <table class="summary-table">
+        <tr><th>项目</th><th>值</th></tr>
+        <tr><td>Skills 总数</td><td>78（新增 8 个）</td></tr>
+        <tr><td>MCP 服务</td><td>5（blinko / zai-mcp-server / web-search-prime / web-reader / zread）</td></tr>
+        <tr><td>运行时</td><td>bun 1.3.14 / Node.js v24.14.1 / Python 3.11.2 / Rust</td></tr>
+        <tr><td>gbrain</td><td>v0.41.20.0 CLI + PGLite 本地数据库</td></tr>
+        <tr><td>缺失项</td><td>Go 环境、Ollama、可用嵌入 API 余额</td></tr>
+      </table>
     </div>
   </div>
-</section>
 
-<!-- ===== FOOTER ===== -->
-<footer class="footer">
-  <div class="container">
-    <p class="footer__text">
-      Moon AI Upgrade Report · Generated from <a href="https://gitee.com/messiahyl/ai-res" target="_blank">ai-res</a> · Published on <a href="https://messiahyl.github.io" target="_blank">GitHub Pages</a> · 2026-05-27
-    </p>
+  <!-- 后续行动 -->
+  <div class="section">
+    <div class="section-title">📋 后续行动项</div>
+    <ul class="action-list">
+      <li>
+        <span class="priority priority-high">高</span>
+        <span><strong>充值智谱 API 或切换免费嵌入服务。</strong>gbrain 的知识写入/语义搜索完全依赖嵌入 API。推荐方案：①智谱充值（embedding-3 单价极低，10 元够用很久）②尝试 Silicon Flow 免费嵌入额度 ③自建小型嵌入服务。</span>
+      </li>
+      <li>
+        <span class="priority priority-mid">中</span>
+        <span><strong>实战验证 cangjie-skill。</strong>选一本商业或技术书籍（如《纳瓦尔宝典》或《系统设计》），用 book2skill 拆解为可执行 Skill，验证蒸馏质量。</span>
+      </li>
+      <li>
+        <span class="priority priority-mid">中</span>
+        <span><strong>启动 webnovel-writer 项目。</strong>用 <code>webnovel-init</code> 初始化一个网文项目，走完 init → plan → write → review 全流程，评估对网文创作的实际帮助。</span>
+      </li>
+      <li>
+        <span class="priority priority-low">低</span>
+        <span><strong>评估 GSD Redux 的 Clacky Skill 适配。</strong>GSD 的项目管理方法论（milestone/phase/capture）可以蒸馏为一个 SKILL.md，但需要手动编写。</span>
+      </li>
+      <li>
+        <span class="priority priority-low">低</span>
+        <span><strong>持续扫描 ai-res 新增资源。</strong>定期拉取仓库更新，对新加入的资源执行同样的筛选→测试→安装流程。</span>
+      </li>
+    </ul>
   </div>
-</footer>
 
-<script>
-// Scroll reveal
-const revealEls = document.querySelectorAll('.reveal');
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry, i) => {
-    if (entry.isIntersecting) {
-      setTimeout(() => {
-        entry.target.classList.add('visible');
-      }, i * 80);
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-revealEls.forEach(el => observer.observe(el));
+  <!-- 筛选方法论 -->
+  <div class="section">
+    <div class="section-title">📐 资源筛选方法论</div>
+    <div class="tool-card">
+      <table class="summary-table">
+        <tr><th>层级</th><th>标准</th><th>处理方式</th></tr>
+        <tr><td>T1</td><td>包含 SKILL.md，格式合规，可直接复制</td><td>直接安装到 ~/.clacky/skills/</td></tr>
+        <tr><td>T2</td><td>有价值但需适配（如 AGENTS.md → SKILL.md）</td><td>手动改写后安装</td></tr>
+        <tr><td>T3</td><td>CLI/工具，需额外配置或运行时</td><td>安装 CLI，配置后使用</td></tr>
+        <tr><td>T4</td><td>Claude Code 专属 / 重复 / 无价值</td><td>排除</td></tr>
+      </table>
+    </div>
+  </div>
 
-// Collapsible
-document.querySelectorAll('.collapsible-trigger').forEach(btn => {
-  btn.addEventListener('click', () => {
-    btn.classList.toggle('open');
-    const content = btn.nextElementSibling;
-    content.classList.toggle('open');
-  });
-});
+</div>
 
-// Smooth parallax for hero orbs
-let ticking = false;
-window.addEventListener('scroll', () => {
-  if (!ticking) {
-    requestAnimationFrame(() => {
-      const scrollY = window.scrollY;
-      const orbs = document.querySelectorAll('.hero-orb');
-      orbs.forEach((orb, i) => {
-        const speed = (i + 1) * 0.05;
-        orb.style.transform = `translateY(${scrollY * speed}px)`;
-      });
-      ticking = false;
-    });
-    ticking = true;
-  }
-});
-</script>
+<div class="footer">
+  <p>Moon Upgrade Report · Generated by Moon (Clacky AI Agent) · 2025-05-27</p>
+  <p style="margin-top:4px">Source: <a href="https://gitee.com/messiahyl/ai-res" style="color:var(--primary)">gitee.com/messiahyl/ai-res</a> · Published at: <a href="https://messiahyl.github.io/project/moon-upgrade-report.html" style="color:var(--primary)">messiahyl.github.io</a></p>
+</div>
+
 </body>
 </html>
