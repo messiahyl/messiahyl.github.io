@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moon 升级报告 — AI 资源武装</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-deep: #06080f;
+  --bg: #0a0e1a;
+  --bg-card: rgba(14, 22, 42, 0.65);
+  --bg-card-hover: rgba(20, 32, 58, 0.8);
+  --fg: #e4e8f1;
+  --fg-muted: #7a8baa;
+  --fg-dim: #4a5a78;
+  --accent-cyan: #00d4ff;
+  --accent-purple: #7c5cfc;
+  --accent-green: #00ff9d;
+  --accent-amber: #ffb020;
+  --accent-rose: #ff3b7a;
+  --border: rgba(255,255,255,0.06);
+  --glow-cyan: 0 0 30px rgba(0,212,255,0.15);
+  --glow-purple: 0 0 30px rgba(124,92,252,0.15);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --mono: 'Space Mono', monospace;
+  --sans: 'Noto Sans SC', system-ui, sans-serif;
+  --display: 'Playfair Display', serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* === NOISE OVERLAY === */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 3px; }
+
+/* === GLOBAL ANIMATIONS === */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.03; }
+  50% { opacity: 0.06; }
+}
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* === CONTAINER === */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* === HERO === */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 80px 24px;
+  overflow: hidden;
+}
+
+/* Grid background */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridPulse 8s ease-in-out infinite;
+}
+
+/* Gradient orbs */
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+}
+.hero-orb--cyan {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(0,212,255,0.12), transparent 70%);
+  top: -10%; right: -10%;
+  animation: float 12s ease-in-out infinite;
+}
+.hero-orb--purple {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(124,92,252,0.1), transparent 70%);
+  bottom: -5%; left: -8%;
+  animation: float 10s ease-in-out infinite reverse;
+}
+.hero-orb--green {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(0,255,157,0.06), transparent 70%);
+  top: 40%; left: 50%;
+  animation: float 14s ease-in-out infinite 2s;
+}
+
+/* Rotating ring decoration */
+.hero-ring {
+  position: absolute;
+  width: 600px; height: 600px;
+  border: 1px solid rgba(0,212,255,0.06);
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  animation: rotate 120s linear infinite;
+  pointer-events: none;
+}
+.hero-ring::before {
+  content: '';
+  position: absolute;
+  width: 8px; height: 8px;
+  background: var(--accent-cyan);
+  border-radius: 50%;
+  top: -4px; left: 50%;
+  box-shadow: 0 0 12px var(--accent-cyan);
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px;
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 100px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent-cyan);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: rgba(0,212,255,0.04);
+  margin-bottom: 32px;
+  animation: fadeUp 1s ease-out 0.2s both;
+}
+.hero-badge .dot {
+  width: 6px; height: 6px;
+  background: var(--accent-green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.hero-title {
+  font-family: var(--display);
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 24px;
+  animation: fadeUp 1s ease-out 0.4s both;
+  position: relative;
+}
+.hero-title .gradient {
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent-cyan) 50%, var(--accent-purple) 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 6s ease-in-out infinite;
+}
+
+.hero-subtitle {
+  font-size: clamp(14px, 2vw, 18px);
+  color: var(--fg-muted);
+  max-width: 600px;
+  line-height: 1.8;
+  margin-bottom: 48px;
+  animation: fadeUp 1s ease-out 0.6s both;
+}
+.hero-subtitle strong {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeUp 1s ease-out 0.8s both;
+}
+.hero-stat {
+  text-align: center;
+}
+.hero-stat__number {
+  font-family: var(--mono);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  line-height: 1;
+}
+.hero-stat__label {
+  font-size: 12px;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-top: 6px;
+}
+
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--fg-dim);
+  font-size: 11px;
+  font-family: var(--mono);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  animation: fadeIn 1s ease-out 1.2s both;
+}
+.hero-scroll-hint .arrow {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, var(--fg-dim), transparent);
+  animation: pulse 2s infinite;
+}
+
+/* === SECTION === */
+.section {
+  padding: 100px 0;
+  position: relative;
+}
+.section--alt {
+  background: linear-gradient(180deg, transparent, rgba(0,212,255,0.015) 50%, transparent);
+}
+
+.section-header {
+  margin-bottom: 56px;
+  max-width: 600px;
+}
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  margin-bottom: 16px;
+}
+.section-tag::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: var(--accent-cyan);
+}
+.section-title {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.section-desc {
+  font-size: 15px;
+  color: var(--fg-muted);
+  margin-top: 12px;
+  line-height: 1.8;
+}
+
+/* === STAT CARDS === */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.stat-card:hover {
+  background: var(--bg-card-hover);
+  transform: translateY(-4px);
+  border-color: rgba(0,212,255,0.15);
+  box-shadow: var(--glow-cyan);
+}
+.stat-card:hover::before { opacity: 1; }
+
+.stat-card__icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+  display: block;
+}
+.stat-card__count {
+  font-family: var(--mono);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-card__label {
+  font-size: 12px;
+  color: var(--fg-muted);
+  letter-spacing: 0.05em;
+}
+.stat-card--highlight .stat-card__count {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* === TOOL CARDS === */
+.tools-section {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+.tools-group-title {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.tools-group-title .count {
+  color: var(--accent-cyan);
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.tool-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  backdrop-filter: blur(12px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.tool-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(0,212,255,0.03), rgba(124,92,252,0.03));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.tool-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(0,212,255,0.2);
+  box-shadow: var(--glow-cyan);
+}
+.tool-card:hover::after { opacity: 1; }
+
+.tool-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+.tool-card__name {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--fg);
+}
+.tool-card__stars {
+  font-size: 12px;
+  color: var(--accent-amber);
+  letter-spacing: 1px;
+}
+.tool-card__desc {
+  font-size: 13px;
+  color: var(--fg-muted);
+  line-height: 1.7;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+.tool-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  position: relative;
+  z-index: 1;
+}
+.tag {
+  display: inline-flex;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-family: var(--mono);
+  border-radius: 100px;
+  letter-spacing: 0.02em;
+}
+.tag--cyan {
+  background: rgba(0,212,255,0.08);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0,212,255,0.15);
+}
+.tag--purple {
+  background: rgba(124,92,252,0.08);
+  color: var(--accent-purple);
+  border: 1px solid rgba(124,92,252,0.15);
+}
+.tag--green {
+  background: rgba(0,255,157,0.06);
+  color: var(--accent-green);
+  border: 1px solid rgba(0,255,157,0.12);
+}
+.tag--amber {
+  background: rgba(255,176,32,0.06);
+  color: var(--accent-amber);
+  border: 1px solid rgba(255,176,32,0.12);
+}
+
+.tool-card--armed {
+  border-color: rgba(0,255,157,0.15);
+}
+.tool-card--armed::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-green), transparent);
+}
+.tool-card--recommend {
+  border-color: rgba(124,92,252,0.1);
+}
+.tool-card--recommend::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-purple), transparent);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 100px;
+  position: relative;
+  z-index: 1;
+}
+.status-badge--armed {
+  background: rgba(0,255,157,0.08);
+  color: var(--accent-green);
+  border: 1px solid rgba(0,255,157,0.2);
+}
+.status-badge--recommend {
+  background: rgba(124,92,252,0.08);
+  color: var(--accent-purple);
+  border: 1px solid rgba(124,92,252,0.2);
+}
+.status-badge .dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+.status-badge--armed .dot { background: var(--accent-green); }
+.status-badge--recommend .dot { background: var(--accent-purple); }
+
+/* === PRACTICE CARDS === */
+.practices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+.practice-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+.practice-card:hover {
+  border-color: rgba(0,212,255,0.15);
+}
+.practice-card__header {
+  padding: 24px 24px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.practice-card__icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+.practice-card__title {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.practice-card__subtitle {
+  font-size: 12px;
+  color: var(--fg-dim);
+  font-family: var(--mono);
+}
+.practice-card__body {
+  padding: 16px 24px;
+}
+.practice-card__stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.stack-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--fg);
+  transition: all 0.2s;
+}
+.stack-item:hover {
+  background: rgba(0,212,255,0.06);
+  border-color: rgba(0,212,255,0.2);
+}
+.stack-item .plus {
+  color: var(--fg-dim);
+  font-size: 10px;
+}
+.practice-card__desc {
+  font-size: 13px;
+  color: var(--fg-muted);
+  line-height: 1.7;
+}
+
+/* === PIPELINE FLOW === */
+.pipeline {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 40px 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.pipeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  text-align: center;
+  min-width: 120px;
+}
+.pipeline-step__icon {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  border: 1px solid var(--border);
+  transition: all 0.3s;
+}
+.pipeline-step:hover .pipeline-step__icon {
+  transform: scale(1.1);
+  box-shadow: var(--glow-cyan);
+}
+.pipeline-step__label {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--fg-muted);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.pipeline-step__tool {
+  font-size: 10px;
+  color: var(--accent-cyan);
+  font-family: var(--mono);
+}
+.pipeline-arrow {
+  flex-shrink: 0;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-dim);
+  font-size: 18px;
+  padding-bottom: 30px;
+}
+.pipeline-arrow svg {
+  width: 24px; height: 12px;
+  stroke: var(--fg-dim);
+  fill: none;
+  stroke-width: 1.5;
+}
+
+/* === CHECKLIST === */
+.checklist {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all 0.3s;
+  cursor: default;
+}
+.checklist-item:hover {
+  border-color: rgba(0,212,255,0.15);
+  background: var(--bg-card-hover);
+}
+.checklist-item__checkbox {
+  width: 20px; height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid var(--fg-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.checklist-item:hover .checklist-item__checkbox {
+  border-color: var(--accent-cyan);
+}
+.checklist-item__text {
+  font-size: 14px;
+  color: var(--fg-muted);
+}
+.checklist-item:hover .checklist-item__text {
+  color: var(--fg);
+}
+
+/* === FOOTER === */
+.footer {
+  padding: 48px 0;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+.footer__text {
+  font-size: 12px;
+  color: var(--fg-dim);
+  font-family: var(--mono);
+  letter-spacing: 0.05em;
+}
+.footer__text a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+}
+.footer__text a:hover {
+  text-decoration: underline;
+}
+
+/* === DIVIDER === */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 0;
+  border: none;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .hero-stats { gap: 24px; }
+  .hero-stat__number { font-size: 28px; }
+  .tools-grid { grid-template-columns: 1fr; }
+  .practices-grid { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: repeat(3, 1fr); }
+  .checklist { grid-template-columns: 1fr; }
+  .pipeline { justify-content: flex-start; padding: 40px 16px; }
+  .section { padding: 60px 0; }
+}
+
+/* === COLLAPSIBLE === */
+.collapsible-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: var(--accent-cyan);
+  font-family: var(--mono);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 8px 0;
+  letter-spacing: 0.05em;
+  transition: opacity 0.2s;
+}
+.collapsible-trigger:hover { opacity: 0.7; }
+.collapsible-trigger svg {
+  transition: transform 0.3s;
+}
+.collapsible-trigger.open svg {
+  transform: rotate(180deg);
+}
+.collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.collapsible-content.open {
+  max-height: 2000px;
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-orb hero-orb--cyan"></div>
+  <div class="hero-orb hero-orb--purple"></div>
+  <div class="hero-orb hero-orb--green"></div>
+  <div class="hero-ring"></div>
+
+  <div class="hero-badge">
+    <span class="dot"></span>
+    <span>AI Resource Analysis · 2026-05-27</span>
+  </div>
+
+  <h1 class="hero-title">
+    <span class="gradient">Moon 升级报告</span>
+  </h1>
+
+  <p class="hero-subtitle">
+    基于 <strong>ai-res</strong> 仓库 <strong>51 项</strong> AI 资源深度分析，<br>
+    覆盖 <strong>8 大分类 · 46 项活跃资源 · 7 份最佳实践</strong>，<br>
+    筛选武器库，输出最佳实践方案。
+  </p>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat__number">51</div>
+      <div class="hero-stat__label">Total Resources</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat__number">8</div>
+      <div class="hero-stat__label">Categories</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat__number">46</div>
+      <div class="hero-stat__label">Active</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat__number">7</div>
+      <div class="hero-stat__label">Best Practices</div>
+    </div>
+  </div>
+
+  <div class="hero-scroll-hint">
+    <span>Scroll</span>
+    <div class="arrow"></div>
+  </div>
+</section>
+
+<!-- ===== STATS ===== -->
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">Overview</div>
+      <h2 class="section-title">资源统计概览</h2>
+      <p class="section-desc">ai-res 仓库按分类的资源分布。Agent 工具是最大类别（22 项），反映 AI Agent 生态的高速发展。</p>
+    </div>
+
+    <div class="stat-grid reveal">
+      <div class="stat-card stat-card--highlight">
+        <span class="stat-card__icon">🧩</span>
+        <div class="stat-card__count">10</div>
+        <div class="stat-card__label">Skills</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__icon">🔌</span>
+        <div class="stat-card__count">2</div>
+        <div class="stat-card__label">MCP</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__icon">🧩</span>
+        <div class="stat-card__count">1</div>
+        <div class="stat-card__label">Plugins</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__icon">⌨️</span>
+        <div class="stat-card__count">5</div>
+        <div class="stat-card__label">CLI Tools</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__icon">📦</span>
+        <div class="stat-card__count">11</div>
+        <div class="stat-card__label">Open Source</div>
+      </div>
+      <div class="stat-card stat-card--highlight">
+        <span class="stat-card__icon">🤖</span>
+        <div class="stat-card__count">22</div>
+        <div class="stat-card__label">Agent Tools</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__icon">📊</span>
+        <div class="stat-card__count">0</div>
+        <div class="stat-card__label">Reports</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===== ARMORY ===== -->
+<section class="section section--alt">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">Armory</div>
+      <h2 class="section-title">精选武器库</h2>
+      <p class="section-desc">从 51 项资源中筛选出 Moon 可直接武装的高价值工具，分为「已武装」和「推荐武装」两级。</p>
+    </div>
+
+    <div class="tools-section">
+      <!-- ARMED -->
+      <div class="reveal">
+        <div class="tools-group-title">
+          <span style="color:var(--accent-green)">●</span> 已武装 — Clacky 已集成 <span class="count">(7)</span>
+        </div>
+        <div class="tools-grid">
+
+          <div class="tool-card tool-card--armed">
+            <div class="tool-card__header">
+              <span class="tool-card__name">huashu-design</span>
+              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
+            </div>
+            <div class="tool-card__stars">★★★★★</div>
+            <div class="tool-card__desc">HTML 原生一体化设计 Skill — 交互原型、幻灯片、动画、信息图、品牌设计、5 维评审，7 大能力矩阵。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">设计</span>
+              <span class="tag tag--purple">HTML 原型</span>
+              <span class="tag tag--green">品牌资产</span>
+            </div>
+          </div>
+
+          <div class="tool-card tool-card--armed">
+            <div class="tool-card__header">
+              <span class="tool-card__name">nuwa-skill</span>
+              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
+            </div>
+            <div class="tool-card__stars">★★★★★</div>
+            <div class="tool-card__desc">思维蒸馏 Skill — 输入人名/主题，自动深度调研 → 思维框架提炼 → 生成可运行的人物 Skill。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">思维蒸馏</span>
+              <span class="tag tag--purple">认知框架</span>
+              <span class="tag tag--green">心智模型</span>
+            </div>
+          </div>
+
+          <div class="tool-card tool-card--armed">
+            <div class="tool-card__header">
+              <span class="tool-card__name">gstack</span>
+              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
+            </div>
+            <div class="tool-card__stars">★★★★★</div>
+            <div class="tool-card__desc">Garry Tan 完整开发工作流 — 23 个专业化 Skill，把 AI 助手变成虚拟工程团队。96k star。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">Sprint 流程</span>
+              <span class="tag tag--purple">多角色协作</span>
+              <span class="tag tag--amber">96k ★</span>
+            </div>
+          </div>
+
+          <div class="tool-card tool-card--armed">
+            <div class="tool-card__header">
+              <span class="tool-card__name">superpowers</span>
+              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
+            </div>
+            <div class="tool-card__stars">★★★★★</div>
+            <div class="tool-card__desc">自动触发的开发方法论 — Agent 启动后自动进入 brainstorming → spec → TDD → review 完整流程。176k star。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">TDD</span>
+              <span class="tag tag--purple">自动触发</span>
+              <span class="tag tag--amber">176k ★</span>
+            </div>
+          </div>
+
+          <div class="tool-card tool-card--armed">
+            <div class="tool-card__header">
+              <span class="tool-card__name">get-shit-done</span>
+              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
+            </div>
+            <div class="tool-card__stars">★★★★★</div>
+            <div class="tool-card__desc">上下文工程 + Spec 驱动 — 解决 Agent 上下文腐烂问题，XML prompt 格式化 + subagent 编排。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">上下文工程</span>
+              <span class="tag tag--purple">Spec 驱动</span>
+              <span class="tag tag--green">防 Context Rot</span>
+            </div>
+          </div>
+
+          <div class="tool-card tool-card--armed">
+            <div class="tool-card__header">
+              <span class="tool-card__name">Playwright MCP</span>
+              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
+            </div>
+            <div class="tool-card__stars">★★★★★</div>
+            <div class="tool-card__desc">Microsoft Playwright MCP — 成熟浏览器自动化框架，支持录制回放、E2E 测试。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">浏览器自动化</span>
+              <span class="tag tag--purple">MCP</span>
+              <span class="tag tag--green">E2E 测试</span>
+            </div>
+          </div>
+
+          <div class="tool-card tool-card--armed">
+            <div class="tool-card__header">
+              <span class="tool-card__name">Chrome DevTools MCP</span>
+              <span class="status-badge status-badge--armed"><span class="dot"></span> ARMED</span>
+            </div>
+            <div class="tool-card__stars">★★★★★</div>
+            <div class="tool-card__desc">Chrome DevTools Protocol 直连 — 实时调试线上页面，查看 Console、Network、DOM。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">CDP</span>
+              <span class="tag tag--purple">实时调试</span>
+              <span class="tag tag--green">Chrome</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RECOMMEND -->
+      <div class="reveal">
+        <div class="tools-group-title">
+          <span style="color:var(--accent-purple)">●</span> 推荐武装 — 高价值待集成 <span class="count">(7)</span>
+        </div>
+        <div class="tools-grid">
+
+          <div class="tool-card tool-card--recommend">
+            <div class="tool-card__header">
+              <span class="tool-card__name">gbrain</span>
+              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
+            </div>
+            <div class="tool-card__stars">★★★★★</div>
+            <div class="tool-card__desc">知识图谱记忆系统 — PGLite 存储，向量搜索，MCP 协议接入。项目知识的长期记忆大脑。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">知识图谱</span>
+              <span class="tag tag--purple">向量搜索</span>
+              <span class="tag tag--green">MCP</span>
+            </div>
+          </div>
+
+          <div class="tool-card tool-card--recommend">
+            <div class="tool-card__header">
+              <span class="tool-card__name">Beads</span>
+              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
+            </div>
+            <div class="tool-card__stars">★★★★★</div>
+            <div class="tool-card__desc">Agent 记忆 + 任务管理 + 依赖图 — 基于 Dolt 版本数据库，追踪 Agent 决策链路。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">Agent 记忆</span>
+              <span class="tag tag--purple">Dolt</span>
+              <span class="tag tag--green">依赖图</span>
+            </div>
+          </div>
+
+          <div class="tool-card tool-card--recommend">
+            <div class="tool-card__header">
+              <span class="tool-card__name">skillshare</span>
+              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
+            </div>
+            <div class="tool-card__stars">★★★★☆</div>
+            <div class="tool-card__desc">多平台 Skill 统一同步 — Go 单二进制，60+ 平台支持，内置安全审计和 Web Dashboard。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">Skill 同步</span>
+              <span class="tag tag--purple">60+ 平台</span>
+              <span class="tag tag--amber">Go</span>
+            </div>
+          </div>
+
+          <div class="tool-card tool-card--recommend">
+            <div class="tool-card__header">
+              <span class="tool-card__name">AgentSys</span>
+              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
+            </div>
+            <div class="tool-card__stars">★★★★★</div>
+            <div class="tool-card__desc">跨平台 Agent 编排 — 5 平台通吃 + agnix 配置检查 + 成本优化 + 代码审查。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">跨平台</span>
+              <span class="tag tag--purple">Agent 编排</span>
+              <span class="tag tag--green">成本优化</span>
+            </div>
+          </div>
+
+          <div class="tool-card tool-card--recommend">
+            <div class="tool-card__header">
+              <span class="tool-card__name">Evot</span>
+              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
+            </div>
+            <div class="tool-card__stars">★★★★★</div>
+            <div class="tool-card__desc">Rust 自进化 Agent 引擎 — 零浪费上下文，token 节省 50%。/goal 自主规划，/harden 压力测试。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">Rust</span>
+              <span class="tag tag--purple">Token 优化</span>
+              <span class="tag tag--green">自进化</span>
+            </div>
+          </div>
+
+          <div class="tool-card tool-card--recommend">
+            <div class="tool-card__header">
+              <span class="tool-card__name">squad</span>
+              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
+            </div>
+            <div class="tool-card__stars">★★★★☆</div>
+            <div class="tool-card__desc">多 Agent 终端协作 — SQLite 消息总线，manager/worker/inspector 角色体系，tmux 集成。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">多 Agent</span>
+              <span class="tag tag--purple">SQLite</span>
+              <span class="tag tag--green">终端协作</span>
+            </div>
+          </div>
+
+          <div class="tool-card tool-card--recommend">
+            <div class="tool-card__header">
+              <span class="tool-card__name">Rowboat</span>
+              <span class="status-badge status-badge--recommend"><span class="dot"></span> RECOMMEND</span>
+            </div>
+            <div class="tool-card__stars">★★★★★</div>
+            <div class="tool-card__desc">AI 同事 + 知识图谱 — Electron 桌面应用，持久化记忆，上下文感知的 Agent 协作。</div>
+            <div class="tool-card__tags">
+              <span class="tag tag--cyan">知识图谱</span>
+              <span class="tag tag--purple">记忆系统</span>
+              <span class="tag tag--green">Electron</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===== BEST PRACTICES ===== -->
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">Best Practices</div>
+      <h2 class="section-title">最佳实践方案</h2>
+      <p class="section-desc">基于跨工具组合分析，为 5 种核心场景设计的工具搭配策略。</p>
+    </div>
+
+    <div class="practices-grid">
+
+      <div class="practice-card reveal">
+        <div class="practice-card__header">
+          <span class="practice-card__icon">🏗️</span>
+          <div>
+            <div class="practice-card__title">独立开发者全栈</div>
+            <div class="practice-card__subtitle">dev → deploy pipeline</div>
+          </div>
+        </div>
+        <div class="practice-card__body">
+          <div class="practice-card__stack">
+            <span class="stack-item">gstack</span>
+            <span class="stack-item">gbrain</span>
+            <span class="stack-item">pinme</span>
+          </div>
+          <div class="practice-card__desc">
+            gstack 定义开发流程（23 个 Skill 覆盖规划→编码→审查→部署），gbrain 提供项目知识记忆，pinme 一键部署到 IPFS。从想法到上线最短路径。
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-card reveal">
+        <div class="practice-card__header">
+          <span class="practice-card__icon">🤖</span>
+          <div>
+            <div class="practice-card__title">多 Agent 协作</div>
+            <div class="practice-card__subtitle">multi-agent orchestration</div>
+          </div>
+        </div>
+        <div class="practice-card__body">
+          <div class="practice-card__stack">
+            <span class="stack-item">Evot</span>
+            <span class="stack-item">squad</span>
+            <span class="stack-item">oh-my-claudecode</span>
+          </div>
+          <div class="practice-card__desc">
+            Evot 作为 Worker 执行引擎（token 节省 50%），squad 做 Agent 间消息协调，OMC 负责任务分解和智能路由。三层架构覆盖复杂功能开发。
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-card reveal">
+        <div class="practice-card__header">
+          <span class="practice-card__icon">⚡</span>
+          <div>
+            <div class="practice-card__title">快速原型</div>
+            <div class="practice-card__subtitle">rapid prototyping</div>
+          </div>
+        </div>
+        <div class="practice-card__body">
+          <div class="practice-card__stack">
+            <span class="stack-item">GSD</span>
+            <span class="stack-item">huashu-design</span>
+            <span class="stack-item">pinme</span>
+          </div>
+          <div class="practice-card__desc">
+            GSD 的 Spec 驱动快速定义需求，huashu-design 生成高保真交互原型，pinme 秒级部署。半天内从想法到可演示产品。
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-card reveal">
+        <div class="practice-card__header">
+          <span class="practice-card__icon">🌐</span>
+          <div>
+            <div class="practice-card__title">浏览器自动化</div>
+            <div class="practice-card__subtitle">browser automation</div>
+          </div>
+        </div>
+        <div class="practice-card__body">
+          <div class="practice-card__stack">
+            <span class="stack-item">Playwright MCP</span>
+            <span class="stack-item">Chrome DevTools MCP</span>
+            <span class="stack-item">gstack /browse</span>
+          </div>
+          <div class="practice-card__desc">
+            开发阶段用 /browse 做 QA，测试阶段用 Playwright 做回归，线上用 Chrome DevTools 实时调试。三阶段浏览器工具覆盖。
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-card reveal">
+        <div class="practice-card__header">
+          <span class="practice-card__icon">🧠</span>
+          <div>
+            <div class="practice-card__title">知识管理</div>
+            <div class="practice-card__subtitle">knowledge management</div>
+          </div>
+        </div>
+        <div class="practice-card__body">
+          <div class="practice-card__stack">
+            <span class="stack-item">gbrain</span>
+            <span class="stack-item">Claude-Mem</span>
+            <span class="stack-item">skillshare</span>
+          </div>
+          <div class="practice-card__desc">
+            gbrain 管理项目知识和决策记录，Claude-Mem 记录对话经验和踩坑，skillshare 统一管理安装的 Skill 并跨平台同步。三层知识体系。
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===== PIPELINE ===== -->
+<section class="section section--alt">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">Pipeline</div>
+      <h2 class="section-title">开发→部署 完整链路</h2>
+      <p class="section-desc">基于 gstack Sprint 流程的完整工作链路，每步输出是下一步输入。</p>
+    </div>
+
+    <div class="pipeline reveal">
+      <div class="pipeline-step">
+        <div class="pipeline-step__icon" style="background:rgba(0,212,255,0.06);">💡</div>
+        <span class="pipeline-step__label">/office-hours</span>
+        <span class="pipeline-step__tool">gstack</span>
+      </div>
+      <div class="pipeline-arrow"><svg viewBox="0 0 24 12"><path d="M0 6 L20 6 M16 2 L20 6 L16 10"/></svg></div>
+      <div class="pipeline-step">
+        <div class="pipeline-step__icon" style="background:rgba(124,92,252,0.06);">📋</div>
+        <span class="pipeline-step__label">/plan-review</span>
+        <span class="pipeline-step__tool">CEO + Eng</span>
+      </div>
+      <div class="pipeline-arrow"><svg viewBox="0 0 24 12"><path d="M0 6 L20 6 M16 2 L20 6 L16 10"/></svg></div>
+      <div class="pipeline-step">
+        <div class="pipeline-step__icon" style="background:rgba(0,255,157,0.06);">⌨️</div>
+        <span class="pipeline-step__label">编码 + TDD</span>
+        <span class="pipeline-step__tool">superpowers</span>
+      </div>
+      <div class="pipeline-arrow"><svg viewBox="0 0 24 12"><path d="M0 6 L20 6 M16 2 L20 6 L16 10"/></svg></div>
+      <div class="pipeline-step">
+        <div class="pipeline-step__icon" style="background:rgba(255,176,32,0.06);">🔍</div>
+        <span class="pipeline-step__label">/review</span>
+        <span class="pipeline-step__tool">Code Review</span>
+      </div>
+      <div class="pipeline-arrow"><svg viewBox="0 0 24 12"><path d="M0 6 L20 6 M16 2 L20 6 L16 10"/></svg></div>
+      <div class="pipeline-step">
+        <div class="pipeline-step__icon" style="background:rgba(255,59,122,0.06);">🧪</div>
+        <span class="pipeline-step__label">/qa</span>
+        <span class="pipeline-step__tool">Browse + QA</span>
+      </div>
+      <div class="pipeline-arrow"><svg viewBox="0 0 24 12"><path d="M0 6 L20 6 M16 2 L20 6 L16 10"/></svg></div>
+      <div class="pipeline-step">
+        <div class="pipeline-step__icon" style="background:rgba(0,212,255,0.06);">🚀</div>
+        <span class="pipeline-step__label">/ship</span>
+        <span class="pipeline-step__tool">Deploy</span>
+      </div>
+      <div class="pipeline-arrow"><svg viewBox="0 0 24 12"><path d="M0 6 L20 6 M16 2 L20 6 L16 10"/></svg></div>
+      <div class="pipeline-step">
+        <div class="pipeline-step__icon" style="background:rgba(0,255,157,0.06);">🔄</div>
+        <span class="pipeline-step__label">/retro</span>
+        <span class="pipeline-step__tool">复盘</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===== NEXT STEPS ===== -->
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">Next Steps</div>
+      <h2 class="section-title">升级路线图</h2>
+      <p class="section-desc">基于本次分析，规划的下一步工具安装和集成计划。</p>
+    </div>
+
+    <div class="checklist reveal">
+      <div class="checklist-item">
+        <div class="checklist-item__checkbox"></div>
+        <span class="checklist-item__text">安装 gbrain 建立知识记忆系统</span>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-item__checkbox"></div>
+        <span class="checklist-item__text">安装 skillshare 统一管理多平台 Skills</span>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-item__checkbox"></div>
+        <span class="checklist-item__text">安装 Evot 提升长任务执行效率</span>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-item__checkbox"></div>
+        <span class="checklist-item__text">配置 squad 多 Agent 终端协作环境</span>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-item__checkbox"></div>
+        <span class="checklist-item__text">持续从 ai-res 仓库发现并集成新资源</span>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-item__checkbox"></div>
+        <span class="checklist-item__text">建立定期扫描机制，自动更新 GitHub Pages 站点</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container">
+    <p class="footer__text">
+      Moon AI Upgrade Report · Generated from <a href="https://gitee.com/messiahyl/ai-res" target="_blank">ai-res</a> · Published on <a href="https://messiahyl.github.io" target="_blank">GitHub Pages</a> · 2026-05-27
+    </p>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+      }, i * 80);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+revealEls.forEach(el => observer.observe(el));
+
+// Collapsible
+document.querySelectorAll('.collapsible-trigger').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('open');
+    const content = btn.nextElementSibling;
+    content.classList.toggle('open');
+  });
+});
+
+// Smooth parallax for hero orbs
+let ticking = false;
+window.addEventListener('scroll', () => {
+  if (!ticking) {
+    requestAnimationFrame(() => {
+      const scrollY = window.scrollY;
+      const orbs = document.querySelectorAll('.hero-orb');
+      orbs.forEach((orb, i) => {
+        const speed = (i + 1) * 0.05;
+        orb.style.transform = `translateY(${scrollY * speed}px)`;
+      });
+      ticking = false;
+    });
+    ticking = true;
+  }
+});
+</script>
+</body>
+</html>
