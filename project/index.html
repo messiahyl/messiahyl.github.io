@@ -3,170 +3,582 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>项目 — 月流烟渚</title>
+<title>TechDoc Agent — 技术文档智能分析</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;600;700;900&family=LXGW+WenKai:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --ink: #2C2420; --ink-mid: #5C4F46; --ink-light: #8C7E74; --ink-faint: #BFB5AC;
-  --paper: #FAF8F4; --paper-warm: #F2EDE6; --paper-deep: #E8E1D8;
-  --cinnabar: #C0493A; --cinnabar-light: #E87B6C; --cinnabar-bg: rgba(192,73,58,0.06);
-  --sage: #5B7A6E; --sage-bg: rgba(91,122,110,0.08);
-  --gold: #B8924A; --gold-bg: rgba(184,146,74,0.08);
-  --line: #E5DDD4; --line-dark: #D4CBC0;
-  --serif: 'Noto Serif SC', 'Playfair Display', Georgia, serif;
-  --display: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
-  --body: 'DM Sans', 'LXGW WenKai', -apple-system, sans-serif;
-  --cn: 'LXGW WenKai', 'Noto Serif SC', Georgia, serif;
-  --mono: 'JetBrains Mono', 'Menlo', monospace;
-  --nav-h: 64px;
-  --r: 12px;
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e17;
+  --bg-surface:#111827;
+  --bg-card:#151d2e;
+  --fg:#e8edf5;
+  --fg-muted:#7a8ba8;
+  --accent:#00f0ff;
+  --accent-dim:rgba(0,240,255,.12);
+  --warm:#ffb800;
+  --warm-dim:rgba(255,184,0,.1);
+  --border:rgba(122,139,168,.15);
+  --radius:12px;
+  --font-display:'Syne',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:16px;scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
-body{font-family:var(--body);background:var(--paper);color:var(--ink);line-height:1.7;overflow-x:hidden}
-::selection{background:var(--cinnabar);color:#fff}
-a{color:var(--cinnabar);text-decoration:none;transition:color .2s}
-a:hover{color:var(--cinnabar-light)}
-body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#c4bfb8 .4px,transparent .4px);background-size:20px 20px;opacity:.18;pointer-events:none;z-index:0}
-.wrap{max-width:800px;margin:0 auto;padding:0 32px;position:relative;z-index:1}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:var(--font-body);
+  line-height:1.6;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
 
-/* 统一导航 */
-.site-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);background:rgba(250,248,244,.75);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);border-bottom:1px solid transparent;transition:background .35s,border-color .35s,box-shadow .35s}
-.site-nav.scrolled{background:rgba(250,248,244,.95);border-bottom-color:var(--line);box-shadow:0 1px 12px rgba(44,36,32,.05)}
-.nav-inner{display:flex;align-items:center;justify-content:space-between;height:100%;max-width:1100px;margin:0 auto;padding:0 32px}
-.nav-brand{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.3px;transition:color .2s}
-.nav-brand:hover{color:var(--cinnabar)}
-.nav-links{display:flex;align-items:center;gap:32px}
-.nav-links a{font-size:14px;font-weight:500;color:var(--ink-light);position:relative;padding:4px 0}
-.nav-links a:hover{color:var(--ink)}
-.nav-links a::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1.5px;background:var(--cinnabar);transition:width .25s ease}
-.nav-links a:hover::after{width:100%}
-.nav-links a.active{color:var(--cinnabar);font-weight:600}
-.nav-toggle{display:none;background:none;border:none;font-size:22px;color:var(--ink);cursor:pointer;padding:4px}
+/* ---- animated grid bg ---- */
+.grid-bg{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,240,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,240,255,.04) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 30%,black 20%,transparent 70%);
+}
+.grid-bg::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 600px 400px at 70% 20%,rgba(0,240,255,.06),transparent),
+             radial-gradient(ellipse 500px 500px at 20% 70%,rgba(255,184,0,.04),transparent);
+}
 
-.page-header{padding-top:calc(var(--nav-h) + 48px);padding-bottom:40px}
-.page-header h1{font-family:var(--serif);font-size:32px;font-weight:700;color:var(--ink);letter-spacing:-.5px;margin-bottom:8px}
-.page-header p{font-size:16px;color:var(--ink-light);max-width:480px}
+/* ---- glow orb ---- */
+.orb{
+  position:fixed;width:500px;height:500px;border-radius:50%;filter:blur(120px);
+  pointer-events:none;z-index:0;opacity:.35;
+  animation:orbFloat 12s ease-in-out infinite alternate;
+}
+.orb-1{background:var(--accent);top:-10%;right:-5%}
+.orb-2{background:var(--warm);bottom:-15%;left:-8%;animation-delay:-6s}
+@keyframes orbFloat{0%{transform:translate(0,0)}100%{transform:translate(-40px,30px)}}
 
-.section-label{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:12px}
-.section-label::after{content:'';flex:1;height:1px;background:var(--line)}
+/* ---- layout ---- */
+.content{position:relative;z-index:1}
 
-.project-card{display:block;padding:28px 0;border-bottom:1px solid var(--line);text-decoration:none;transition:all .25s;position:relative}
-.project-card:last-child{border-bottom:none}
-.project-card:hover{background:var(--cinnabar-bg);margin:0 -16px;padding-left:16px;padding-right:16px;border-radius:8px;border-color:transparent}
-.project-meta{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.project-date{font-family:var(--mono);font-size:12px;color:var(--ink-faint)}
-.project-tags{display:flex;gap:6px}
-.project-tags span{font-size:12px;color:var(--sage);background:var(--sage-bg);padding:2px 10px;border-radius:10px;font-weight:500}
-.project-title{font-family:var(--serif);font-size:21px;font-weight:700;color:var(--ink);line-height:1.45;letter-spacing:-.2px;transition:color .2s}
-.project-card:hover .project-title{color:var(--cinnabar)}
-.project-excerpt{margin-top:6px;font-size:14.5px;color:var(--ink-light);line-height:1.7}
-.project-links{margin-top:10px;display:flex;gap:12px}
-.project-links span{font-family:var(--mono);font-size:12px;color:var(--cinnabar);font-weight:500}
+/* ---- nav ---- */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:1.2rem 2rem;
+  background:rgba(10,14,23,.7);
+  backdrop-filter:blur(20px) saturate(1.4);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  transition:background .3s;
+}
+.nav-logo{
+  font-family:var(--font-display);font-weight:800;font-size:1.15rem;
+  letter-spacing:-.02em;color:var(--fg);
+  display:flex;align-items:center;gap:.6rem;
+}
+.nav-logo .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 12px var(--accent);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.nav-links{display:flex;gap:2rem;align-items:center}
+.nav-links a{
+  color:var(--fg-muted);text-decoration:none;font-size:.875rem;font-weight:500;
+  transition:color .2s;letter-spacing:.01em;
+}
+.nav-links a:hover{color:var(--accent)}
+.nav-cta{
+  background:var(--accent);color:var(--bg);font-weight:700;font-size:.8rem;
+  padding:.55rem 1.2rem;border-radius:6px;border:none;cursor:pointer;
+  letter-spacing:.03em;text-transform:uppercase;font-family:var(--font-display);
+  transition:transform .15s,box-shadow .15s;
+}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,240,255,.35)}
 
-footer{padding:48px 0;text-align:center;font-size:13px;color:var(--ink-faint);margin-top:40px}
-footer a{color:var(--ink-light)}
-footer a:hover{color:var(--cinnabar)}
+/* ---- hero ---- */
+.hero{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:8rem 2rem 4rem;position:relative;
+}
+.hero-inner{max-width:960px;text-align:center}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--accent-dim);border:1px solid rgba(0,240,255,.2);
+  border-radius:100px;padding:.35rem 1rem .35rem .6rem;
+  font-size:.75rem;font-weight:600;color:var(--accent);
+  margin-bottom:2rem;letter-spacing:.04em;text-transform:uppercase;
+  font-family:var(--font-mono);
+  animation:fadeUp .8s ease-out both;
+}
+.hero-badge .badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);
+  animation:pulse 2s ease-in-out infinite}
+.hero h1{
+  font-family:var(--font-display);font-weight:800;
+  font-size:clamp(2.8rem,7vw,5.2rem);
+  line-height:1.05;letter-spacing:-.03em;
+  margin-bottom:1.5rem;
+  animation:fadeUp .8s ease-out .15s both;
+}
+.hero h1 .accent{
+  background:linear-gradient(135deg,var(--accent),#00c8ff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero h1 .warm{
+  background:linear-gradient(135deg,var(--warm),#ff8c00);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-sub{
+  font-size:clamp(1rem,2vw,1.25rem);color:var(--fg-muted);
+  max-width:600px;margin:0 auto 3rem;line-height:1.7;
+  animation:fadeUp .8s ease-out .3s both;
+}
+.hero-actions{
+  display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;
+  animation:fadeUp .8s ease-out .45s both;
+}
+.btn-primary{
+  background:var(--accent);color:var(--bg);font-weight:700;
+  padding:.85rem 2rem;border-radius:8px;border:none;cursor:pointer;
+  font-size:.95rem;font-family:var(--font-display);letter-spacing:.01em;
+  display:flex;align-items:center;gap:.5rem;
+  transition:transform .15s,box-shadow .15s;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 30px rgba(0,240,255,.3)}
+.btn-secondary{
+  background:transparent;color:var(--fg);font-weight:600;
+  padding:.85rem 2rem;border-radius:8px;cursor:pointer;
+  font-size:.95rem;font-family:var(--font-display);
+  border:1px solid var(--border);
+  transition:border-color .2s,color .2s;
+}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.project-card{animation:fadeUp .35s ease both}
-.project-card:nth-child(2){animation-delay:.04s}
-.project-card:nth-child(3){animation-delay:.08s}
+/* ---- terminal preview ---- */
+.terminal{
+  max-width:720px;margin:4rem auto 0;
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  animation:fadeUp .8s ease-out .6s both;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+.terminal-bar{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.7rem 1rem;background:rgba(0,0,0,.3);
+  border-bottom:1px solid var(--border);
+}
+.terminal-dot{width:10px;height:10px;border-radius:50%}
+.terminal-dot.r{background:#ff5f57}.terminal-dot.y{background:#ffbd2e}.terminal-dot.g{background:#28ca41}
+.terminal-title{margin-left:.5rem;font-size:.7rem;color:var(--fg-muted);font-family:var(--font-mono)}
+.terminal-body{
+  padding:1.2rem 1.5rem;font-family:var(--font-mono);font-size:.8rem;
+  line-height:1.8;color:var(--fg-muted);
+}
+.terminal-body .prompt{color:var(--accent)}
+.terminal-body .cmd{color:var(--fg)}
+.terminal-body .comment{color:#4a5568;font-style:italic}
+.terminal-body .output{color:var(--warm)}
+.typed-cursor{display:inline-block;width:2px;height:1em;background:var(--accent);
+  animation:blink 1s step-end infinite;vertical-align:text-bottom;margin-left:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
+/* ---- section ---- */
+section{padding:6rem 2rem}
+.section-label{
+  font-family:var(--font-mono);font-size:.7rem;font-weight:700;
+  color:var(--accent);letter-spacing:.15em;text-transform:uppercase;
+  margin-bottom:.8rem;
+}
+.section-title{
+  font-family:var(--font-display);font-weight:800;
+  font-size:clamp(1.8rem,4vw,2.8rem);
+  letter-spacing:-.02em;line-height:1.15;margin-bottom:1rem;
+}
+.section-desc{color:var(--fg-muted);max-width:540px;line-height:1.7;font-size:1.05rem}
+
+/* ---- features ---- */
+.features-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:1.5rem;max-width:1100px;margin:3rem auto 0;
+}
+.feature-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:2rem;
+  position:relative;overflow:hidden;
+  transition:transform .25s,border-color .25s,box-shadow .25s;
+}
+.feature-card:hover{
+  transform:translateY(-4px);border-color:rgba(0,240,255,.3);
+  box-shadow:0 12px 40px rgba(0,0,0,.3);
+}
+.feature-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent),transparent);
+  opacity:0;transition:opacity .25s;
+}
+.feature-card:hover::before{opacity:1}
+.feature-icon{
+  width:48px;height:48px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;margin-bottom:1.2rem;
+}
+.feature-icon.cyan{background:var(--accent-dim);color:var(--accent)}
+.feature-icon.warm{background:var(--warm-dim);color:var(--warm)}
+.feature-icon.green{background:rgba(52,211,153,.1);color:#34d399}
+.feature-card h3{
+  font-family:var(--font-display);font-weight:700;font-size:1.15rem;
+  margin-bottom:.6rem;letter-spacing:-.01em;
+}
+.feature-card p{color:var(--fg-muted);font-size:.9rem;line-height:1.65}
+
+/* ---- tech stack ---- */
+.tech-section{text-align:center}
+.tech-grid{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:.8rem;
+  max-width:800px;margin:2.5rem auto 0;
+}
+.tech-tag{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:8px;padding:.5rem 1.1rem;
+  font-family:var(--font-mono);font-size:.78rem;font-weight:500;
+  display:flex;align-items:center;gap:.4rem;
+  transition:border-color .2s,transform .15s;
+}
+.tech-tag:hover{border-color:var(--accent);transform:translateY(-2px)}
+.tech-tag .tag-dot{width:6px;height:6px;border-radius:50%}
+
+/* ---- api showcase ---- */
+.api-section{max-width:900px;margin:0 auto}
+.api-block{
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;margin-top:2rem;
+}
+.api-block .block-header{
+  padding:.8rem 1.2rem;background:rgba(0,0,0,.25);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:.8rem;
+  font-family:var(--font-mono);font-size:.75rem;
+}
+.api-block .method{
+  background:rgba(52,211,153,.15);color:#34d399;
+  padding:.15rem .6rem;border-radius:4px;font-weight:700;
+}
+.api-block .endpoint{color:var(--fg-muted)}
+.api-block pre{
+  padding:1.2rem 1.5rem;font-family:var(--font-mono);font-size:.78rem;
+  line-height:1.75;color:var(--fg-muted);overflow-x:auto;
+}
+.api-block pre .key{color:var(--accent)}
+.api-block pre .str{color:var(--warm)}
+.api-block pre .comment-pre{color:#4a5568}
+
+/* ---- quickstart steps ---- */
+.steps-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;max-width:900px;margin:2.5rem auto 0;
+}
+.step-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.8rem;
+  position:relative;
+}
+.step-num{
+  font-family:var(--font-display);font-weight:800;font-size:3rem;
+  color:rgba(0,240,255,.08);position:absolute;top:.8rem;right:1.2rem;
+  line-height:1;
+}
+.step-card h4{
+  font-family:var(--font-display);font-weight:700;
+  margin-bottom:.5rem;font-size:1rem;
+}
+.step-card p{color:var(--fg-muted);font-size:.85rem;line-height:1.6}
+.step-card code{
+  background:rgba(0,240,255,.08);color:var(--accent);
+  padding:.15rem .4rem;border-radius:4px;font-family:var(--font-mono);
+  font-size:.78rem;
+}
+
+/* ---- cta ---- */
+.cta-section{
+  text-align:center;padding:8rem 2rem;
+  position:relative;
+}
+.cta-section::before{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:1px;height:60px;background:linear-gradient(to bottom,transparent,var(--accent));
+}
+.cta-section h2{
+  font-family:var(--font-display);font-weight:800;
+  font-size:clamp(1.6rem,3.5vw,2.4rem);
+  margin-bottom:1rem;letter-spacing:-.02em;
+}
+.cta-section p{color:var(--fg-muted);margin-bottom:2rem;font-size:1.05rem}
+
+/* ---- footer ---- */
+footer{
+  border-top:1px solid var(--border);
+  padding:2rem;text-align:center;
+  font-size:.8rem;color:var(--fg-muted);
+}
+footer a{color:var(--accent);text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+/* ---- animations ---- */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease-out,transform .6s ease-out}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ---- responsive ---- */
 @media(max-width:768px){
-  .nav-toggle{display:block}
-  .nav-links{position:fixed;top:var(--nav-h);left:0;right:0;background:rgba(250,248,244,.98);backdrop-filter:blur(20px);flex-direction:column;padding:24px 32px;gap:20px;border-bottom:1px solid var(--line);transform:translateY(-120%);opacity:0;transition:transform .35s ease,opacity .35s ease}
-  .nav-links.open{transform:translateY(0);opacity:1}
-}
-@media(max-width:640px){
-  :root{--nav-h:56px}
-  .wrap{padding:0 20px}
-  .page-header h1{font-size:26px}
+  nav{padding:1rem}
+  .nav-links{display:none}
+  .hero{padding:6rem 1.2rem 3rem}
+  section{padding:4rem 1.2rem}
+  .features-grid,.steps-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
-<!-- 统一导航 -->
-<nav class="site-nav" id="siteNav">
-  <div class="nav-inner">
-    <a class="nav-brand" href="/">月流烟渚</a>
-    <div class="nav-links" id="navLinks">
-      <a href="/">主页</a>
-      <a href="/article/">文章</a>
-      <a href="/project/" class="active">项目</a>
-      <a href="https://github.com/messiahyl" target="_blank" rel="noopener">GitHub ↗</a>
-    </div>
-    <button class="nav-toggle" id="navToggle" aria-label="菜单">☰</button>
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="content">
+
+<!-- nav -->
+<nav>
+  <div class="nav-logo">
+    <span class="dot"></span>
+    TechDoc Agent
+  </div>
+  <div class="nav-links">
+    <a href="#features">功能</a>
+    <a href="#tech">技术栈</a>
+    <a href="#api">API</a>
+    <a href="#quickstart">快速开始</a>
+    <button class="nav-cta" onclick="document.getElementById('quickstart').scrollIntoView({behavior:'smooth'})">Get Started</button>
   </div>
 </nav>
 
-<div class="wrap">
-  <div class="page-header">
-    <h1>项目</h1>
-    <p>开源项目与独立开发实验。每个项目都是一次技术探索，从想法到上线。</p>
+<!-- hero -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Open Source · MCP Protocol · Spring Boot 3.3
+    </div>
+    <h1>
+      让 AI <span class="accent">读懂</span>你的<br>技术<span class="warm">架构</span>
+    </h1>
+    <p class="hero-sub">
+      上传技术文档，AI 自动提取架构设计、关键决策点和风险评估。<br>
+      基于 MCP 协议，即插即用连接你的工具链。
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="document.getElementById('quickstart').scrollIntoView({behavior:'smooth'})">
+        ⚡ 30 秒启动
+      </button>
+      <button class="btn-secondary" onclick="document.getElementById('api').scrollIntoView({behavior:'smooth'})">
+        查看 API 文档 →
+      </button>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="terminal-dot r"></span>
+        <span class="terminal-dot y"></span>
+        <span class="terminal-dot g"></span>
+        <span class="terminal-title">techdoc-agent — bash</span>
+      </div>
+      <div class="terminal-body">
+        <div><span class="prompt">$</span> <span class="cmd">export LLM_API_KEY=your-key</span></div>
+        <div><span class="prompt">$</span> <span class="cmd">mvn spring-boot:run</span></div>
+        <div class="comment"># ✨ TechDoc Agent v1.0.0 启动中...</div>
+        <div class="comment"># MCP Servers 启动完成</div>
+        <div class="output">✓ Agent ready → http://localhost:8080</div>
+        <div><span class="prompt">$</span> <span class="cmd">curl -X POST /api/v1/agent/analyze</span><span class="typed-cursor"></span></div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <div class="section-label">项目列表</div>
-  <main>
-    <a href="/project/agent-mesh.html" class="project-card">
-      <div class="project-meta">
-        <span class="project-date">2026-05-27</span>
-        <div class="project-tags">
-          <span>Rust</span><span>AI Agent</span><span>Git</span><span>Axum</span>
-        </div>
+<!-- features -->
+<section id="features">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="reveal">
+      <div class="section-label">Core Features</div>
+      <div class="section-title">为开发者设计的<br>三个核心能力</div>
+      <div class="section-desc">不是又一个聊天机器人。TechDoc Agent 是专门为技术文档理解而构建的垂直 Agent。</div>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon cyan">📄</div>
+        <h3>架构自动分析</h3>
+        <p>上传任意技术文档，Agent 自动识别核心架构模式、组件依赖关系和数据流向，输出结构化分析报告。</p>
       </div>
-      <h2 class="project-title">AgentMesh</h2>
-      <p class="project-excerpt">基于 Git 的 AI Agent 跨机器协同框架。纯 Rust 实现，频道通信、任务看板、自动同步、心跳监控、Web Dashboard，开箱即用。</p>
-      <div class="project-links">
-        <span>产品演示 →</span>
-        <span style="color:var(--line-dark)">|</span>
-        <a href="/project/agent-mesh-docs.html" style="font-family:var(--mono);font-size:12px">使用文档 →</a>
+      <div class="feature-card reveal">
+        <div class="feature-icon warm">💬</div>
+        <h3>智能文档问答</h3>
+        <p>基于文档上下文的多轮对话。精准回答关于技术选型、设计决策和实现细节的问题，拒绝幻觉。</p>
       </div>
-    </a>
+      <div class="feature-card reveal">
+        <div class="feature-icon green">🔌</div>
+        <h3>MCP 工具集成</h3>
+        <p>通过 Model Context Protocol 即插即用连接文件系统、搜索引擎、数据库等外部工具，扩展 Agent 能力边界。</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <a href="/project/index-techdoc.html" class="project-card">
-      <div class="project-meta">
-        <span class="project-date">2026-05-24</span>
-        <div class="project-tags">
-          <span>AI</span><span>文档分析</span><span>SaaS</span>
-        </div>
-      </div>
-      <h2 class="project-title">TechDoc Agent</h2>
-      <p class="project-excerpt">技术文档智能分析平台。自动解析 API 文档、提取结构化数据、生成代码示例和技术摘要。</p>
-      <div class="project-links">
-        <span>查看详情 →</span>
-      </div>
-    </a>
+<!-- tech stack -->
+<section id="tech" class="tech-section">
+  <div class="reveal">
+    <div class="section-label">Tech Stack</div>
+    <div class="section-title">现代化技术栈</div>
+    <div class="section-desc" style="margin:0 auto">基于成熟的开源生态，一行命令即可启动。</div>
+  </div>
+  <div class="tech-grid reveal">
+    <div class="tech-tag"><span class="tag-dot" style="background:#34d399"></span>Spring Boot 3.3</div>
+    <div class="tech-tag"><span class="tag-dot" style="background:var(--accent)"></span>Java 21</div>
+    <div class="tech-tag"><span class="tag-dot" style="background:var(--warm)"></span>MCP Protocol</div>
+    <div class="tech-tag"><span class="tag-dot" style="background:#a78bfa"></span>DeepSeek / Qwen</div>
+    <div class="tech-tag"><span class="tag-dot" style="background:#f87171"></span>OkHttp 4.12</div>
+    <div class="tech-tag"><span class="tag-dot" style="background:#60a5fa"></span>Jackson</div>
+    <div class="tech-tag"><span class="tag-dot" style="background:#fbbf24"></span>Lombok</div>
+    <div class="tech-tag"><span class="tag-dot" style="background:#34d399"></span>Maven</div>
+  </div>
+</section>
 
-    <a href="/project/moon-upgrade-report.html" class="project-card">
-      <div class="project-meta">
-        <span class="project-date">2026-05-27</span>
-        <div class="project-tags">
-          <span>AI 资源</span><span>工具链</span><span>Skill</span>
-        </div>
-      </div>
-      <h2 class="project-title">Moon 升级报告</h2>
-      <p class="project-excerpt">基于 ai-res 仓库 51 项 AI 资源的系统化分析：8 大分类统计、14 项精选工具、5 种最佳实践方案、完整开发→部署链路。</p>
-      <div class="project-links">
-        <span>查看报告 →</span>
-      </div>
-    </a>
-  </main>
+<!-- api -->
+<section id="api">
+  <div class="api-section">
+    <div class="reveal">
+      <div class="section-label">API Reference</div>
+      <div class="section-title">简洁的 REST API</div>
+      <div class="section-desc">三个端点覆盖所有场景，5 分钟集成到你的系统。</div>
+    </div>
 
-  <footer>
-    <p>© 2026 <a href="/">月流烟渚</a> · 用文字沉淀思考</p>
-  </footer>
-</div>
+    <div class="api-block reveal">
+      <div class="block-header">
+        <span class="method">POST</span>
+        <span class="endpoint">/api/v1/agent/analyze</span>
+        <span style="margin-left:auto;color:var(--fg-muted)">文档分析</span>
+      </div>
+      <pre><span class="comment-pre">// 请求</span>
+{
+  <span class="key">"content"</span>: <span class="str">"你的技术文档内容..."</span>
+}
+
+<span class="comment-pre">// 响应 — 自动输出架构分析、关键决策、风险评估</span>
+{
+  <span class="key">"reply"</span>: <span class="str">"## 架构概览\n- 核心模式: 微服务 + 事件驱动\n- 关键决策: 选用 Kafka 作为消息总线..."</span>
+}</pre>
+    </div>
+
+    <div class="api-block reveal">
+      <div class="block-header">
+        <span class="method">POST</span>
+        <span class="endpoint">/api/v1/agent/chat</span>
+        <span style="margin-left:auto;color:var(--fg-muted)">通用对话</span>
+      </div>
+      <pre><span class="comment-pre">// 支持多轮对话</span>
+{
+  <span class="key">"message"</span>: <span class="str">"解释一下微服务架构的核心模式"</span>,
+  <span class="key">"history"</span>: [
+    { <span class="key">"role"</span>: <span class="str">"user"</span>, <span class="key">"content"</span>: <span class="str">"上一步的问题..."</span> },
+    { <span class="key">"role"</span>: <span class="str">"assistant"</span>, <span class="key">"content"</span>: <span class="str">"上一步的回答..."</span> }
+  ]
+}</pre>
+    </div>
+
+    <div class="api-block reveal">
+      <div class="block-header">
+        <span class="method">POST</span>
+        <span class="endpoint">/api/v1/agent/ask</span>
+        <span style="margin-left:auto;color:var(--fg-muted)">文档问答</span>
+      </div>
+      <pre><span class="comment-pre">// 基于指定文档上下文精准回答</span>
+{
+  <span class="key">"question"</span>: <span class="str">"这个系统用了什么消息队列？"</span>,
+  <span class="key">"documentContext"</span>: <span class="str">"文档上下文..."</span>,
+  <span class="key">"history"</span>: []
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- quickstart -->
+<section id="quickstart">
+  <div style="max-width:900px;margin:0 auto;text-align:center">
+    <div class="reveal">
+      <div class="section-label">Quick Start</div>
+      <div class="section-title">30 秒启动你的 Agent</div>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <div class="step-num">01</div>
+        <h4>配置 API Key</h4>
+        <p>设置 <code>LLM_API_KEY</code> 环境变量，支持 DeepSeek / Qwen / Claude 一键切换。</p>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">02</div>
+        <h4>启动服务</h4>
+        <p>运行 <code>mvn spring-boot:run</code>，MCP Server 自动连接。</p>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">03</div>
+        <h4>调用 API</h4>
+        <p>POST 请求 <code>/api/v1/agent/analyze</code>，获取结构化分析结果。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- cta -->
+<section class="cta-section">
+  <div class="reveal">
+    <h2>开始构建你的 AI Agent</h2>
+    <p>开源、轻量、可扩展。从文档分析起步，延伸到无限可能。</p>
+    <button class="btn-primary" style="margin:0 auto" onclick="window.open('https://github.com','_blank')">
+      ⭐ Star on GitHub
+    </button>
+  </div>
+</section>
+
+<!-- footer -->
+<footer>
+  <p>TechDoc Agent &copy; 2026 &nbsp;·&nbsp; Built with <a href="#">Spring Boot</a> + <a href="#">MCP Protocol</a> &nbsp;·&nbsp; <a href="#">MIT License</a></p>
+</footer>
+
+</div><!-- /content -->
 
 <script>
+// scroll reveal
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+    }
+  });
+},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// typing animation for terminal
 (function(){
-  var nav=document.getElementById('siteNav');
-  window.addEventListener('scroll',function(){nav.classList.toggle('scrolled',window.scrollY>20)},{passive:true});
-  var toggle=document.getElementById('navToggle'),links=document.getElementById('navLinks');
-  toggle.addEventListener('click',function(){links.classList.toggle('open');toggle.textContent=links.classList.contains('open')?'✕':'☰'});
+  const lines = document.querySelectorAll('.terminal-body > div');
+  lines.forEach((line,i)=>{
+    line.style.opacity='0';
+    line.style.transform='translateY(6px)';
+    line.style.transition='opacity .3s ease, transform .3s ease';
+    line.style.transitionDelay=(0.6+i*0.15)+'s';
+  });
+  setTimeout(()=>{
+    lines.forEach(line=>{line.style.opacity='1';line.style.transform='translateY(0)'});
+  },100);
 })();
 </script>
 </body>
